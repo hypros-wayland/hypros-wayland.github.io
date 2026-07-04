@@ -1,0 +1,22 @@
+# --- minimal live environment for netinstall ISO ---
+base
+linux
+linux-firmware
+mkinitcpio
+mkinitcpio-archiso
+syslinux
+sudo
+nano
+dialog
+wget
+networkmanager
+dhcpcd
+iw
+arch-install-scripts
+gptfdisk
+parted
+dosfstools
+binutils
+efibootmgr
+grub
+os-prober
