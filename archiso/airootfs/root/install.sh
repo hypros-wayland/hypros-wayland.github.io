@@ -47,52 +47,72 @@ Continue?" 12 70 || { clear; exit 0; }
 # ---------------------------------------------------------------------------
 # 2. Network setup
 # ---------------------------------------------------------------------------
-# Ensure NetworkManager is running (archiso may not start it by default)
-systemctl start NetworkManager 2>/dev/null || true
-# Give it a moment to settle
-sleep 2
+# archiso runs systemd-networkd by default, which conflicts with NM.
+# Shut it down and let NM take over completely.
+systemctl stop systemd-networkd 2>/dev/null || true
+systemctl stop systemd-resolved 2>/dev/null || true
+systemctl enable --now NetworkManager 2>/dev/null || true
+nmcli general networking on 2>/dev/null || true
+sleep 3
 
-# Find any interface with a live carrier (ethernet, built-in, USB dongle, etc.)
-ETH_IFACE=""
+# Collect all non-loopback interfaces
+IFACES=()
 for iface in /sys/class/net/*; do
     name=$(basename "$iface")
     [ "$name" = "lo" ] && continue
-    carrier="$(cat "$iface/carrier" 2>/dev/null)"
+    IFACES+=("$name")
+done
+
+WIRED_IFACE=""
+for name in "${IFACES[@]}"; do
+    carrier="$(cat /sys/class/net/"$name"/carrier 2>/dev/null)"
     if [ "$carrier" = "1" ]; then
-        ETH_IFACE="$name"
+        WIRED_IFACE="$name"
         break
     fi
 done
 
-if [ -n "$ETH_IFACE" ]; then
-    d --title "Network" --infobox "Wired link detected on $ETH_IFACE — connecting..." 6 65
-    # Tell NM to connect the interface (archiso doesn't auto-connect by default)
-    nmcli device connect "$ETH_IFACE" >/dev/null 2>&1 || true
-    # Wait up to 15s for DHCP via NM
-    for _ in $(seq 1 15); do
-        nmcli -t -f DEVICE,STATE dev status 2>/dev/null | grep -q "^$ETH_IFACE:connected" && break
+net_ok=0
+
+if [ -n "$WIRED_IFACE" ]; then
+    d --title "Network" --infobox "Wired link detected on $WIRED_IFACE — connecting..." 6 65
+    nmcli device connect "$WIRED_IFACE" 2>/dev/null || true
+    nmcli device set "$WIRED_IFACE" autoconnect yes 2>/dev/null || true
+    for _ in $(seq 1 20); do
+        nmcli -t -f DEVICE,STATE dev status 2>/dev/null | grep -q "^$WIRED_IFACE:connected" && { net_ok=1; break; }
         sleep 1
     done
-    # Fallback: if NM still didn't connect, try dhcpcd directly
-    if ! nmcli -t -f DEVICE,STATE dev status 2>/dev/null | grep -q "^$ETH_IFACE:connected"; then
-        dhcpcd "$ETH_IFACE" >/dev/null 2>&1 &
-        sleep 3
+    if [ "$net_ok" = "0" ]; then
+        # Fallback: dhcpcd directly
+        dhcpcd "$WIRED_IFACE" >/dev/null 2>&1 &
+        for _ in $(seq 1 10); do
+            ip -4 addr show "$WIRED_IFACE" 2>/dev/null | grep -q 'inet ' && { net_ok=1; break; }
+            sleep 1
+        done
     fi
-else
-    WLAN_IFACE=$(nmcli -t -f DEVICE,TYPE dev status 2>/dev/null | awk -F: '$2=="wifi"{print $1; exit}')
-    if [ -z "$WLAN_IFACE" ]; then
-        d --title "Network" --msgbox "No ethernet link and no Wi-Fi device found.\n\nConnect a cable or plug in a Wi-Fi adapter, then re-run:\n/root/install.sh" 10 65
-    else
-        d --title "Network" --infobox "No wired link — scanning for Wi-Fi on $WLAN_IFACE..." 6 65
-        nmcli radio wifi on 2>/dev/null || true
-        nmcli dev wifi rescan ifname "$WLAN_IFACE" >/dev/null 2>&1
-        sleep 4
+fi
 
+# Wi‑Fi fallback if wired failed
+if [ "$net_ok" = "0" ]; then
+    WLAN_IFACE=""
+    for name in "${IFACES[@]}"; do
+        [ -d "/sys/class/net/$name/wireless" ] && { WLAN_IFACE="$name"; break; }
+    done
+    if [ -z "$WLAN_IFACE" ]; then
+        # Try nmcli as fallback (some virtual Wi-Fi adapters)
+        WLAN_IFACE=$(nmcli -t -f DEVICE,TYPE dev status 2>/dev/null | awk -F: '$2=="wifi"{print $1; exit}')
+    fi
+
+    if [ -n "$WLAN_IFACE" ]; then
+        d --title "Network" --infobox "No wired link — scanning Wi-Fi on $WLAN_IFACE..." 6 65
+        nmcli radio wifi on 2>/dev/null || true
+        ip link set "$WLAN_IFACE" up 2>/dev/null || true
+        nmcli dev wifi rescan ifname "$WLAN_IFACE" 2>/dev/null || true
+        sleep 5
         mapfile -t WIFI_RAW < <(nmcli -t -f SSID,SIGNAL,SECURITY dev wifi list ifname "$WLAN_IFACE" 2>/dev/null \
             | awk -F: '$1!=""' | sort -t: -k2 -rn | awk -F: '!seen[$1]++')
-
         if [ "${#WIFI_RAW[@]}" -eq 0 ]; then
-            d --title "Wi-Fi" --msgbox "No Wi-Fi networks found.\n\nTry again manually: switch to tty2 (Ctrl+Alt+F2), run:\n  nmcli dev wifi list\n  nmcli dev wifi connect <SSID> password <pass>\nThen switch back (Ctrl+Alt+F1) and re-run /root/install.sh" 12 70
+            d --title "Wi-Fi" --msgbox "No Wi-Fi networks found.\n\nOptions:\n- Check Wi-Fi is enabled\n- Move closer to the router\n- Use tty2 (Ctrl+Alt+F2) to debug manually:\n    nmcli dev wifi list\n    nmcli dev wifi connect <SSID> password <pass>\n  Then switch back (Ctrl+Alt+F1) and re-run /root/install.sh" 14 70
         else
             WIFI_ITEMS=()
             for line in "${WIFI_RAW[@]}"; do
@@ -101,30 +121,54 @@ else
                 signal="${rest%%:*}"
                 WIFI_ITEMS+=("$ssid" "${signal}%")
             done
-
-            SSID=$(d --title "Wi-Fi" --menu "Choose a network:" 18 65 8 "${WIFI_ITEMS[@]}" 3>&1 1>&2 2>&3)
+            SSID=$(d --title "Wi-Fi" --menu "Choose a network:" 18 70 8 "${WIFI_ITEMS[@]}" 3>&1 1>&2 2>&3)
             if [ -n "${SSID:-}" ]; then
-                WIFIPASS=$(d --title "Wi-Fi password" --insecure --passwordbox "Password for $SSID:" 8 60 3>&1 1>&2 2>&3) || WIFIPASS=""
+                WIFIPASS=$(d --title "Wi-Fi password" --insecure --passwordbox "Password for $SSID:" 8 65 3>&1 1>&2 2>&3) || WIFIPASS=""
                 d --title "Wi-Fi" --infobox "Connecting to $SSID..." 5 50
-                nmcli dev wifi connect "$SSID" password "$WIFIPASS" ifname "$WLAN_IFACE" >/dev/null 2>&1
-                sleep 3
+                nmcli dev wifi connect "$SSID" password "$WIFIPASS" ifname "$WLAN_IFACE" 2>/dev/null || true
+                for _ in $(seq 1 15); do
+                    nmcli -t -f DEVICE,STATE dev status 2>/dev/null | grep -q "^$WLAN_IFACE:connected" && { net_ok=1; break; }
+                    sleep 1
+                done
+                if [ "$net_ok" = "0" ]; then
+                    # Fallback: wpa_supplicant + dhcpcd
+                    wpa_passphrase "$SSID" "$WIFIPASS" > /tmp/wpa.conf 2>/dev/null
+                    wpa_supplicant -B -i "$WLAN_IFACE" -c /tmp/wpa.conf 2>/dev/null || true
+                    dhcpcd "$WLAN_IFACE" >/dev/null 2>&1 &
+                    for _ in $(seq 1 10); do
+                        ip -4 addr show "$WLAN_IFACE" 2>/dev/null | grep -q 'inet ' && { net_ok=1; break; }
+                        sleep 1
+                    done
+                fi
             fi
         fi
+    else
+        d --title "Network" --msgbox "No ethernet link and no Wi-Fi device found.\n\nPlug in a cable or Wi-Fi adapter, then re-run:\n/root/install.sh" 10 65
     fi
 fi
 
-# Final, authoritative check regardless of which path above was taken.
-# `timeout` wraps the whole call, not just the ICMP wait — ping's own -W
-# only bounds the reply wait *after* the packet goes out, not the DNS
-# lookup of the hostname beforehand, which can hang far longer than -W3
-# if resolv.conf isn't fully settled yet.
-if ! timeout 8 ping -c1 -W3 archlinux.org >/dev/null 2>&1; then
+# Final check — try IP first, then DNS
+if [ "$net_ok" = "1" ]; then
+    # Wait for DNS to propagate
+    sleep 2
+    # Ping by IP first (Cloudflare DNS) to bypass DNS resolution issues
+    if ! timeout 6 ping -c1 -W2 1.1.1.1 >/dev/null 2>&1; then
+        net_ok=0
+    fi
+fi
+
+if [ "$net_ok" = "0" ]; then
     d --title "Network" --msgbox \
 "Still no network connection.\n\n\
-Try again on another tty (Ctrl+Alt+F2):\n\
-  nmcli dev wifi connect <SSID> password <password>\n\
-Then switch back (Ctrl+Alt+F1) and re-run:\n\
-  /root/install.sh" 12 70
+Options:\n\
+  1. Check your cable / Wi-Fi\n\
+  2. Switch to tty2 (Ctrl+Alt+F2) and troubleshoot:\n\
+     ip link\n\
+     nmcli dev status\n\
+     nmcli dev wifi connect <SSID> password <pass>\n\
+  3. Switch back (Ctrl+Alt+F1) and re-run:\n\
+     /root/install.sh\n\
+  4. Try a different network adapter" 16 70
     clear
     exit 1
 fi
