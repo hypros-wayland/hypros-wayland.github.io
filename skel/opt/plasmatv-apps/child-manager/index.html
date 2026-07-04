@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Parental Controls</title>
+<style>
+  body { margin:0; background:#0f0f14; color:#f2f2f2; font-family:"Noto Sans", sans-serif; padding:2rem; }
+  h1 { font-weight:300; }
+  .card { background:#1a1b22; border-radius:12px; padding:1.2rem 1.4rem; margin-bottom:1rem; }
+  .row { display:flex; align-items:center; gap:1rem; margin-bottom:.5rem; }
+  .row label { width:130px; opacity:.7; }
+  input, select { background:#0f0f14; border:1px solid #333; color:white; padding:.5rem;
+    border-radius:6px; font-size:1rem; }
+  button { background:#3b82f6; border:none; color:white; padding:.5rem 1rem; border-radius:6px;
+    cursor:pointer; font-size:.95rem; }
+  button.danger { background:#dc2626; }
+  button.secondary { background:#374151; }
+  .child-card { display:flex; justify-content:space-between; align-items:center; }
+  .child-info { opacity:.8; font-size:.9rem; }
+  #status { min-height:1.4rem; color:#4ade80; }
+</style>
+</head>
+<body>
+  <h1>Parental Controls</h1>
+
+  <div class="card">
+    <h3>Add a child profile</h3>
+    <div class="row"><label>Slot</label><select id="new-slot"></select></div>
+    <div class="row"><label>Name</label><input id="new-name" placeholder="e.g. Alex"></div>
+    <div class="row"><label>Daily limit</label><input id="new-limit" type="number" value="60" min="5" step="5"> minutes</div>
+    <button onclick="createChild()">Add child</button>
+  </div>
+
+  <div class="card">
+    <h3>Existing profiles</h3>
+    <div id="children"></div>
+  </div>
+
+  <div class="card">
+    <h3>PIN for TV User</h3>
+    <p class="child-info">Set a PIN so kids can't get into the adult account from the selector.</p>
+    <div class="row"><label>New PIN</label><input id="adult-pin" type="password" maxlength="8" placeholder="4-8 digits"></div>
+    <button onclick="setAdultPin()">Set PIN</button>
+    <button class="secondary" onclick="clearAdultPin()">Clear PIN</button>
+  </div>
+
+  <div id="status"></div>
+
+<script>
+  const ALL_SLOTS = Array.from({length:16}, (_, i) => `child-user-${i}`);
+
+  async function refresh() {
+    const users = await window.plasmatv.listUsers();
+    const used = Object.keys(users).filter(k => k.startsWith('child-user-'));
+    const free = ALL_SLOTS.filter(s => !used.includes(s));
+
+    const sel = document.getElementById('new-slot');
+    sel.innerHTML = free.map(s => `<option value="${s}">${s}</option>`).join('') ||
+      '<option disabled>No free slots (max 16)</option>';
+
+    const container = document.getElementById('children');
+    container.innerHTML = '';
+    used.forEach(slot => {
+      const info = users[slot];
+      const div = document.createElement('div');
+      div.className = 'card child-card';
+      div.innerHTML = `
+        <div>
+          <strong>${info.displayName}</strong> <span class="child-info">(${slot})</span><br>
+          <span class="child-info">${info.dailyLimitMinutes || 0} min/day ${info.pinProtected ? '· PIN set' : ''}</span>
+        </div>
+        <div>
+          <button class="secondary" onclick="renameChild('${slot}')">Rename</button>
+          <button class="secondary" onclick="relimitChild('${slot}')">Set limit</button>
+          <button class="danger" onclick="deleteChild('${slot}')">Remove</button>
+        </div>`;
+      container.appendChild(div);
+    });
+  }
+
+  function status(msg) {
+    document.getElementById('status').textContent = msg;
+    setTimeout(() => { document.getElementById('status').textContent = ''; }, 3000);
+  }
+
+  async function createChild() {
+    const slot = document.getElementById('new-slot').value;
+    const name = document.getElementById('new-name').value.trim() || 'Kid';
+    const limit = document.getElementById('new-limit').value || 60;
+    if (!slot) return;
+    const ok = await window.plasmatv.createChild(slot, name, limit);
+    status(ok ? `Added ${name}` : 'Failed to add profile');
+    document.getElementById('new-name').value = '';
+    refresh();
+  }
+
+  async function renameChild(slot) {
+    const name = prompt('New display name:');
+    if (!name) return;
+    await window.plasmatv.setChildName(slot, name);
+    refresh();
+  }
+
+  async function relimitChild(slot) {
+    const minutes = prompt('Daily limit in minutes:', '60');
+    if (!minutes) return;
+    await window.plasmatv.setChildLimit(slot, minutes);
+    refresh();
+  }
+
+  async function deleteChild(slot) {
+    if (!confirm(`Remove this profile? This deletes the account and its data.`)) return;
+    await window.plasmatv.deleteChild(slot);
+    refresh();
+  }
+
+  async function setAdultPin() {
+    const pin = document.getElementById('adult-pin').value;
+    if (!/^\d{4,8}$/.test(pin)) { status('PIN must be 4-8 digits'); return; }
+    const ok = await window.plasmatv.setPin('tv-user', pin);
+    status(ok ? 'PIN set' : 'Failed to set PIN');
+    document.getElementById('adult-pin').value = '';
+  }
+
+  async function clearAdultPin() {
+    await window.plasmatv.clearPin('tv-user');
+    status('PIN cleared');
+  }
+
+  refresh();
+</script>
+</body>
+</html>

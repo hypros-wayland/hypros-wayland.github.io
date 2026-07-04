@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Plex
+Comment=Watch Plex
+Exec=electron /opt/plasmatv-apps/streaming-plex
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

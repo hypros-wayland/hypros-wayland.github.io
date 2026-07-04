@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Peacock
+Comment=Watch Peacock
+Exec=electron /opt/plasmatv-apps/streaming-peacock
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

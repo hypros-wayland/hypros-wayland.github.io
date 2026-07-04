@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# plasmatv-set-pin <username> <pin>
+# Root only. Salts + hashes a PIN and stores it in the root-only secrets
+# file. Also flips pinProtected=true in the public file (safe to expose —
+# it's just a boolean, not the hash).
+set -euo pipefail
+[ "$(id -u)" -eq 0 ] || { echo "must run as root" >&2; exit 1; }
+
+PUBLIC=/etc/plasmatv/users-public.json
+SECRETS=/etc/plasmatv/users-secrets.json
+
+user=$1; pin=$2
+[[ "$pin" =~ ^[0-9]{4,8}$ ]] || { echo "PIN must be 4-8 digits" >&2; exit 1; }
+
+salt=$(head -c16 /dev/urandom | sha256sum | cut -c1-16)
+hash=$(printf '%s' "${salt}${pin}" | sha256sum | cut -d' ' -f1)
+
+[ -f "$SECRETS" ] || echo '{}' > "$SECRETS"
+jq --arg u "$user" --arg s "$salt" --arg h "$hash" \
+  '.[$u] = {"salt": $s, "pinHash": $h}' "$SECRETS" > /tmp/sec.$$ && mv /tmp/sec.$$ "$SECRETS"
+chmod 600 "$SECRETS"
+
+jq --arg u "$user" '.[$u].pinProtected = true' "$PUBLIC" > /tmp/pub.$$ && mv /tmp/pub.$$ "$PUBLIC"
+echo "PIN set for $user"

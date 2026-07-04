@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Pluto TV
+Comment=Watch Pluto TV
+Exec=electron /opt/plasmatv-apps/streaming-plutotv
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

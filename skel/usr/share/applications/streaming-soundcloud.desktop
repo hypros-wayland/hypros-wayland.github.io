@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=SoundCloud
+Comment=Watch SoundCloud
+Exec=electron /opt/plasmatv-apps/streaming-soundcloud
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

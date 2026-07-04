@@ -1,0 +1,7 @@
+{
+  "name": "plasmatv-child-manager",
+  "version": "1.0.0",
+  "description": "PlasmaTV parental controls: manage child profiles and PINs",
+  "main": "main.js",
+  "private": true
+}

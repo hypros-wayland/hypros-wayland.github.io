@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# plasmatv-verify-pin <username> <pin>
+# Root only. Exits 0 if correct, 1 if wrong/unset. Never prints the hash —
+# this is the only thing the unprivileged selector-user is allowed to call
+# (see /etc/sudoers.d/plasmatv-selector), so it stays a narrow yes/no check.
+set -euo pipefail
+[ "$(id -u)" -eq 0 ] || { echo "must run as root" >&2; exit 1; }
+SECRETS=/etc/plasmatv/users-secrets.json
+user=$1; pin=$2
+
+[ -f "$SECRETS" ] || exit 1
+entry=$(jq -c --arg u "$user" '.[$u] // empty' "$SECRETS")
+[ -n "$entry" ] || exit 1
+
+salt=$(jq -r '.salt' <<< "$entry")
+want=$(jq -r '.pinHash' <<< "$entry")
+got=$(printf '%s' "${salt}${pin}" | sha256sum | cut -d' ' -f1)
+
+[ "$got" = "$want" ]

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Flip SDDM's autologin session back to Plasma Bigscreen and re-login.
+set -e
+sudo sed -i 's/^Session=.*/Session=plasma-bigscreen.desktop/' /etc/sddm.conf.d/autologin.conf
+notify-send "PlasmaTV" "Switching to Bigscreen mode..." 2>/dev/null || true
+sudo systemctl restart sddm

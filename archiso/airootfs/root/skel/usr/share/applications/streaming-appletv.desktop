@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Apple TV
+Comment=Watch Apple TV
+Exec=electron /opt/plasmatv-apps/streaming-appletv
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

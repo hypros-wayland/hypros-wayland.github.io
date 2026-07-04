@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Prime Video
+Comment=Watch Prime Video
+Exec=electron /opt/plasmatv-apps/streaming-primevideo
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

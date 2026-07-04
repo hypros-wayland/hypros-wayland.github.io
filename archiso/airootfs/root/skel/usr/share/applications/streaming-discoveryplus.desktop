@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Discovery+
+Comment=Watch Discovery+
+Exec=electron /opt/plasmatv-apps/streaming-discoveryplus
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

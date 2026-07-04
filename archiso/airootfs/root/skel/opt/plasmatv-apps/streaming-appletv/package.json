@@ -1,0 +1,7 @@
+{
+  "name": "streaming-appletv",
+  "version": "1.0.0",
+  "description": "Title-bar-less kiosk wrapper for Apple TV, launched from Bigscreen",
+  "main": "main.js",
+  "private": true
+}

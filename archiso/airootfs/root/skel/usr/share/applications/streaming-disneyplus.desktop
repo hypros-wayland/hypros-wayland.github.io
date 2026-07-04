@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Disney+
+Comment=Watch Disney+
+Exec=electron /opt/plasmatv-apps/streaming-disneyplus
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

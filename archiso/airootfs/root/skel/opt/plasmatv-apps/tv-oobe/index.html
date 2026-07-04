@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Welcome to PlasmaTV</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden;
+    background: #0a0a0f;
+    color: #f0f0f0;
+    font-family: "Noto Sans", system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+  }
+  :focus { outline: 2px solid #60a5fa; outline-offset: 2px; }
+  :focus:not(:focus-visible) { outline: none; }
+  :focus-visible { outline: 3px solid #60a5fa; outline-offset: 3px; }
+
+  .card {
+    width: 64vw; max-width: 820px; min-height: 60vh;
+    padding: 2.4rem 2.8rem;
+    background: #13131a;
+    border-radius: 20px;
+    border: 1px solid #22222e;
+    display: flex; flex-direction: column;
+  }
+
+  .progress { display: flex; gap: .35rem; margin-bottom: 2rem; }
+  .progress span { flex: 1; height: 3px; border-radius: 2px; background: #2a2d36; transition: background .3s; }
+  .progress span.done { background: #3b82f6; }
+  .progress span.active { background: #60a5fa; }
+
+  h1 { font-weight: 300; font-size: 2.6rem; margin: .5rem 0 .2rem; letter-spacing: -.02em; }
+  p.sub { opacity: .65; margin-top: .2rem; font-size: 1.1rem; }
+  .step { display: none; flex-direction: column; flex: 1; }
+  .step.active { display: flex; }
+  .step-body { flex: 1; }
+  .step-footer { margin-top: 1.5rem; display: flex; gap: .8rem; flex-wrap: wrap; }
+
+  .btn {
+    background: #2563eb; border: none; color: #fff;
+    padding: .8rem 2rem; border-radius: 10px;
+    font-size: 1.1rem; cursor: pointer;
+    transition: background .15s, transform .1s;
+    min-width: 120px; text-align: center;
+  }
+  .btn:hover { background: #3b82f6; }
+  .btn:active { transform: scale(.97); }
+  .btn.secondary { background: #374151; }
+  .btn.secondary:hover { background: #4b5563; }
+  .btn.small { padding: .5rem 1.2rem; font-size: .95rem; min-width: auto; }
+  .btn:disabled { opacity: .4; cursor: default; }
+
+  .list-wrap {
+    background: #1a1a24; border-radius: 12px;
+    max-height: 38vh; overflow-y: auto; margin-top: 1rem;
+    border: 1px solid #2a2d36;
+  }
+  .list-wrap:focus { border-color: #60a5fa; }
+  .list-item {
+    padding: .85rem 1.2rem; cursor: pointer;
+    border-bottom: 1px solid #22222e;
+    transition: background .1s;
+    font-size: 1.05rem;
+  }
+  .list-item:last-child { border-bottom: none; }
+  .list-item:hover { background: #1f2937; }
+  .list-item.selected { background: #1e3a6e; color: #93c5fd; }
+  .list-item.selected:hover { background: #1e40af; }
+  .list-item .hint { font-size: .85rem; opacity: .5; margin-left: .8rem; }
+
+  .list-empty {
+    padding: 2rem; text-align: center; opacity: .5;
+  }
+
+  .swatches { display: flex; gap: 1.2rem; margin-top: 1rem; }
+  .swatch {
+    width: 180px; height: 120px; border-radius: 14px; cursor: pointer;
+    border: 3px solid transparent; transition: border-color .15s, transform .1s;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: .8rem; font-size: 1rem; font-weight: 500;
+  }
+  .swatch:focus-visible { border-color: #60a5fa; }
+  .swatch.selected { border-color: #3b82f6; }
+  .swatch.dark {
+    background: linear-gradient(160deg, #1b1e27 0%, #0b0c10 100%);
+    color: #d0d0d8;
+  }
+  .swatch.light {
+    background: linear-gradient(160deg, #eef1f7 0%, #c7ccd6 100%);
+    color: #1a1a24;
+  }
+
+  .review-grid {
+    display: grid; grid-template-columns: auto 1fr;
+    gap: .6rem 2rem; margin-top: 1rem;
+    background: #1a1a24; border-radius: 12px; padding: 1.4rem 1.8rem;
+    border: 1px solid #2a2d36;
+  }
+  .review-grid dt { opacity: .5; font-size: .95rem; }
+  .review-grid dd { margin: 0; font-size: 1.1rem; font-weight: 500; }
+
+  .pw-row { display: flex; gap: .8rem; align-items: center; margin-top: 1rem; }
+  .pw-row input {
+    flex: 1; font-size: 1.1rem; padding: .7rem 1rem;
+    border-radius: 10px; border: 1px solid #2a2d36;
+    background: #1a1a24; color: #f0f0f0;
+  }
+  .pw-row input:focus { border-color: #60a5fa; }
+
+  .error-msg {
+    background: #7f1d1d; color: #fca5a5;
+    padding: .7rem 1.2rem; border-radius: 10px;
+    margin-top: .8rem; display: none;
+    font-size: .95rem;
+  }
+  .error-msg.show { display: block; }
+
+  .loading {
+    display: none; align-items: center; gap: .6rem;
+    padding: 1rem 0; opacity: .7;
+  }
+  .loading.show { display: flex; }
+  .spinner { width: 20px; height: 20px; border: 2px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .fade-in { animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+  <div class="card fade-in">
+    <div class="progress" id="progress"></div>
+
+    <!-- Welcome -->
+    <div class="step active" data-step="welcome">
+      <div class="step-body">
+        <h1>Welcome to PlasmaTV</h1>
+        <p class="sub">Set up your TV in a few simple steps. It'll only take a minute.</p>
+      </div>
+      <div class="step-footer">
+        <button class="btn" id="btn-start" onclick="goTo('language')">Get started</button>
+      </div>
+    </div>
+
+    <!-- Language -->
+    <div class="step" data-step="language">
+      <div class="step-body">
+        <h1>Choose your language</h1>
+        <p class="sub">This sets the system language</p>
+        <div class="list-wrap" id="lang-wrap" tabindex="0">
+          <div class="list-empty">Loading...</div>
+        </div>
+      </div>
+      <div class="step-footer">
+        <button class="btn" onclick="commitLanguage()">Continue</button>
+      </div>
+    </div>
+
+    <!-- Region / Timezone -->
+    <div class="step" data-step="region">
+      <div class="step-body">
+        <h1>Choose your region</h1>
+        <p class="sub">Your time zone will be set automatically</p>
+        <div class="list-wrap" id="tz-wrap" tabindex="0">
+          <div class="list-empty">Loading...</div>
+        </div>
+      </div>
+      <div class="step-footer">
+        <button class="btn" onclick="commitTimezone()">Continue</button>
+        <button class="btn secondary" onclick="goTo('wifi')">Skip</button>
+      </div>
+    </div>
+
+    <!-- Wi-Fi -->
+    <div class="step" data-step="wifi">
+      <div class="step-body">
+        <h1>Connect to Wi-Fi</h1>
+        <p class="sub">Choose a wireless network</p>
+        <div class="list-wrap" id="nets-wrap" tabindex="0">
+          <div class="list-empty" id="nets-loading">Scanning...</div>
+        </div>
+        <div id="pw-box" style="display:none">
+          <div class="pw-row">
+            <input id="pw-input" type="password" placeholder="Wi-Fi password">
+            <button class="btn small" onclick="connectWifi()">Connect</button>
+          </div>
+        </div>
+        <div class="error-msg" id="wifi-error"></div>
+      </div>
+      <div class="step-footer">
+        <button class="btn secondary" onclick="goTo('appearance')">Skip Wi-Fi</button>
+      </div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="step" data-step="appearance">
+      <div class="step-body">
+        <h1>Pick a look</h1>
+        <p class="sub">Choose a dark or light theme. You can change this later.</p>
+        <div class="swatches">
+          <div class="swatch dark selected" id="swatch-dark" tabindex="0" onclick="selectTheme('dark')">Dark</div>
+          <div class="swatch light" id="swatch-light" tabindex="0" onclick="selectTheme('light')">Light</div>
+        </div>
+      </div>
+      <div class="step-footer">
+        <button class="btn" onclick="commitTheme()">Continue</button>
+      </div>
+    </div>
+
+    <!-- Review -->
+    <div class="step" data-step="review">
+      <div class="step-body">
+        <h1>Review your choices</h1>
+        <p class="sub">Everything look right?</p>
+        <dl class="review-grid">
+          <dt>Language</dt><dd id="review-lang">—</dd>
+          <dt>Region</dt><dd id="review-tz">—</dd>
+          <dt>Wi-Fi</dt><dd id="review-wifi">—</dd>
+          <dt>Appearance</dt><dd id="review-theme">—</dd>
+        </dl>
+      </div>
+      <div class="step-footer">
+        <button class="btn" onclick="commitAll()">Looks good — finish setup</button>
+        <button class="btn secondary" onclick="goTo('language')">Go back</button>
+      </div>
+    </div>
+
+    <!-- Finish -->
+    <div class="step" data-step="finish">
+      <div class="step-body">
+        <h1>All set!</h1>
+        <p class="sub">Enjoy PlasmaTV Bigscreen.</p>
+      </div>
+      <div class="step-footer">
+        <button class="btn" onclick="window.plasmatv.finish()">Finish</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const STEPS = ['welcome', 'language', 'region', 'wifi', 'appearance', 'review', 'finish'];
+
+const LANGUAGES = [
+  { tag: 'en_US.UTF-8', label: 'English (US)' },
+  { tag: 'en_GB.UTF-8', label: 'English (UK)' },
+  { tag: 'pt_BR.UTF-8', label: 'Português (Brasil)' },
+  { tag: 'pt_PT.UTF-8', label: 'Português (Portugal)' },
+  { tag: 'es_ES.UTF-8', label: 'Español (España)' },
+  { tag: 'es_MX.UTF-8', label: 'Español (México)' },
+  { tag: 'fr_FR.UTF-8', label: 'Français (France)' },
+  { tag: 'de_DE.UTF-8', label: 'Deutsch (Deutschland)' },
+  { tag: 'it_IT.UTF-8', label: 'Italiano (Italia)' },
+  { tag: 'nl_NL.UTF-8', label: 'Nederlands (Nederland)' },
+  { tag: 'ru_RU.UTF-8', label: 'Русский (Россия)' },
+  { tag: 'ja_JP.UTF-8', label: '日本語 (日本)' },
+  { tag: 'ko_KR.UTF-8', label: '한국어 (대한민국)' },
+  { tag: 'zh_CN.UTF-8', label: '简体中文 (中国)' },
+  { tag: 'zh_TW.UTF-8', label: '繁體中文 (台灣)' },
+  { tag: 'ar_SA.UTF-8', label: 'العربية (السعودية)' },
+  { tag: 'tr_TR.UTF-8', label: 'Türkçe (Türkiye)' },
+  { tag: 'pl_PL.UTF-8', label: 'Polski (Polska)' },
+  { tag: 'sv_SE.UTF-8', label: 'Svenska (Sverige)' },
+  { tag: 'da_DK.UTF-8', label: 'Dansk (Danmark)' },
+  { tag: 'nb_NO.UTF-8', label: 'Norsk (Norge)' },
+  { tag: 'fi_FI.UTF-8', label: 'Suomi (Suomi)' },
+  { tag: 'cs_CZ.UTF-8', label: 'Čeština (Česko)' },
+  { tag: 'hu_HU.UTF-8', label: 'Magyar (Magyarország)' },
+  { tag: 'ro_RO.UTF-8', label: 'Română (România)' },
+  { tag: 'th_TH.UTF-8', label: 'ไทย (ไทย)' },
+  { tag: 'vi_VN.UTF-8', label: 'Tiếng Việt (Việt Nam)' },
+  { tag: 'el_GR.UTF-8', label: 'Ελληνικά (Ελλάδα)' },
+  { tag: 'uk_UA.UTF-8', label: 'Українська (Україна)' },
+];
+
+const TIMEZONES = [
+  { tag: 'Pacific/Midway',       label: 'Midway',            region: 'Pacific' },
+  { tag: 'Pacific/Honolulu',     label: 'Honolulu',          region: 'Pacific' },
+  { tag: 'America/Anchorage',    label: 'Anchorage',         region: 'America' },
+  { tag: 'America/Vancouver',    label: 'Vancouver (PT)',    region: 'America' },
+  { tag: 'America/Los_Angeles',  label: 'Los Angeles (PT)',  region: 'America' },
+  { tag: 'America/Edmonton',     label: 'Edmonton (MT)',     region: 'America' },
+  { tag: 'America/Denver',       label: 'Denver (MT)',       region: 'America' },
+  { tag: 'America/Mexico_City',  label: 'Mexico City (CT)',  region: 'America' },
+  { tag: 'America/Winnipeg',     label: 'Winnipeg (CT)',     region: 'America' },
+  { tag: 'America/Chicago',      label: 'Chicago (CT)',      region: 'America' },
+  { tag: 'America/Bogota',       label: 'Bogotá',            region: 'America' },
+  { tag: 'America/Boa_Vista',    label: 'Boa Vista (AMT)',   region: 'America' },
+  { tag: 'America/Toronto',      label: 'Toronto (ET)',      region: 'America' },
+  { tag: 'America/New_York',     label: 'New York (ET)',     region: 'America' },
+  { tag: 'America/Halifax',      label: 'Halifax (AT)',      region: 'America' },
+  { tag: 'America/St_Johns',     label: "St. John's (NST)",  region: 'America' },
+  { tag: 'America/Sao_Paulo',    label: 'Brasília (BRT)',    region: 'America' },
+  { tag: 'America/Argentina/Buenos_Aires', label: 'Buenos Aires', region: 'America' },
+  { tag: 'America/Nuuk',         label: 'Nuuk',              region: 'America' },
+  { tag: 'America/Azores',       label: 'Azores',            region: 'America' },
+  { tag: 'Atlantic/Cape_Verde',  label: 'Cape Verde',        region: 'Atlantic' },
+  { tag: 'Europe/London',        label: 'London (GMT/BST)',  region: 'Europe' },
+  { tag: 'Europe/Dublin',        label: 'Dublin',            region: 'Europe' },
+  { tag: 'Europe/Lisbon',        label: 'Lisbon',            region: 'Europe' },
+  { tag: 'Atlantic/Reykjavik',   label: 'Reykjavik',         region: 'Atlantic' },
+  { tag: 'Europe/Madrid',        label: 'Madrid (CET)',      region: 'Europe' },
+  { tag: 'Europe/Paris',         label: 'Paris (CET)',       region: 'Europe' },
+  { tag: 'Europe/Berlin',        label: 'Berlin (CET)',      region: 'Europe' },
+  { tag: 'Europe/Rome',          label: 'Rome (CET)',        region: 'Europe' },
+  { tag: 'Europe/Amsterdam',     label: 'Amsterdam (CET)',   region: 'Europe' },
+  { tag: 'Europe/Brussels',      label: 'Brussels (CET)',    region: 'Europe' },
+  { tag: 'Europe/Stockholm',     label: 'Stockholm (CET)',   region: 'Europe' },
+  { tag: 'Europe/Copenhagen',    label: 'Copenhagen (CET)',  region: 'Europe' },
+  { tag: 'Europe/Oslo',          label: 'Oslo (CET)',        region: 'Europe' },
+  { tag: 'Europe/Prague',        label: 'Prague (CET)',      region: 'Europe' },
+  { tag: 'Europe/Warsaw',        label: 'Warsaw (CET)',      region: 'Europe' },
+  { tag: 'Europe/Budapest',      label: 'Budapest (CET)',    region: 'Europe' },
+  { tag: 'Europe/Vienna',        label: 'Vienna (CET)',      region: 'Europe' },
+  { tag: 'Europe/Zurich',        label: 'Zurich (CET)',      region: 'Europe' },
+  { tag: 'Europe/Athens',        label: 'Athens (EET)',      region: 'Europe' },
+  { tag: 'Europe/Helsinki',      label: 'Helsinki (EET)',    region: 'Europe' },
+  { tag: 'Europe/Istanbul',      label: 'Istanbul',          region: 'Europe' },
+  { tag: 'Europe/Moscow',        label: 'Moscow (MSK)',      region: 'Europe' },
+  { tag: 'Europe/Kyiv',          label: 'Kyiv (EET)',        region: 'Europe' },
+  { tag: 'Asia/Dubai',           label: 'Dubai',             region: 'Asia' },
+  { tag: 'Asia/Karachi',         label: 'Karachi',           region: 'Asia' },
+  { tag: 'Asia/Kolkata',         label: 'India (IST)',       region: 'Asia' },
+  { tag: 'Asia/Dhaka',           label: 'Dhaka',             region: 'Asia' },
+  { tag: 'Asia/Bangkok',         label: 'Bangkok',           region: 'Asia' },
+  { tag: 'Asia/Jakarta',         label: 'Jakarta',           region: 'Asia' },
+  { tag: 'Asia/Ho_Chi_Minh',     label: 'Ho Chi Minh',       region: 'Asia' },
+  { tag: 'Asia/Shanghai',        label: 'China (CST)',       region: 'Asia' },
+  { tag: 'Asia/Taipei',          label: 'Taipei',            region: 'Asia' },
+  { tag: 'Asia/Tokyo',           label: 'Tokyo (JST)',       region: 'Asia' },
+  { tag: 'Asia/Seoul',           label: 'Seoul (KST)',       region: 'Asia' },
+  { tag: 'Asia/Singapore',       label: 'Singapore',         region: 'Asia' },
+  { tag: 'Asia/Hong_Kong',       label: 'Hong Kong',         region: 'Asia' },
+  { tag: 'Australia/Perth',      label: 'Perth (AWST)',      region: 'Australia' },
+  { tag: 'Australia/Adelaide',   label: 'Adelaide (ACST)',   region: 'Australia' },
+  { tag: 'Australia/Sydney',     label: 'Sydney (AEST)',     region: 'Australia' },
+  { tag: 'Australia/Brisbane',   label: 'Brisbane (AEST)',   region: 'Australia' },
+  { tag: 'Pacific/Auckland',     label: 'Auckland (NZST)',   region: 'Pacific' },
+  { tag: 'Pacific/Fiji',         label: 'Fiji',              region: 'Pacific' },
+];
+
+let state = {
+  lang: LANGUAGES[0],
+  tz: TIMEZONES[0],
+  wifiSsid: null,
+  theme: 'dark',
+};
+
+function renderProgress(activeIdx) {
+  const bar = document.getElementById('progress');
+  bar.innerHTML = '';
+  STEPS.forEach((_s, i) => {
+    const span = document.createElement('span');
+    if (i < activeIdx) span.classList.add('done');
+    if (i === activeIdx) span.classList.add('active');
+    bar.appendChild(span);
+  });
+}
+
+function goTo(stepName) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  const el = document.querySelector(`.step[data-step="${stepName}"]`);
+  el.classList.add('active');
+  el.classList.remove('fade-in');
+  void el.offsetWidth;
+  el.classList.add('fade-in');
+  renderProgress(STEPS.indexOf(stepName));
+  if (stepName === 'language') renderLanguageList();
+  if (stepName === 'region') renderTzList();
+  if (stepName === 'wifi') loadNets();
+  if (stepName === 'review') fillReview();
+  if (stepName === 'appearance') {
+    document.getElementById(`swatch-${state.theme}`).focus();
+  }
+  if (stepName === 'welcome') {
+    document.getElementById('btn-start').focus();
+  }
+}
+
+function renderList(wrapId, items, selectedTag, onSelect) {
+  const wrap = document.getElementById(wrapId);
+  wrap.innerHTML = '';
+  let regionHeader = '';
+  items.forEach((item, idx) => {
+    if (item.region && item.region !== regionHeader) {
+      regionHeader = item.region;
+      const hdr = document.createElement('div');
+      hdr.textContent = regionHeader;
+      hdr.style.cssText = 'padding:.5rem 1.2rem .3rem;font-size:.8rem;opacity:.4;text-transform:uppercase;letter-spacing:.05em;';
+      wrap.appendChild(hdr);
+    }
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.tabIndex = 0;
+    div.dataset.tag = item.tag;
+    if (item.tag === selectedTag) div.classList.add('selected');
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = item.label;
+    div.appendChild(nameSpan);
+    div.onclick = () => {
+      onSelect(item);
+      wrap.querySelectorAll('.list-item').forEach(x => x.classList.remove('selected'));
+      div.classList.add('selected');
+    };
+    div.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        div.click();
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = div.nextElementSibling;
+        if (next && next.classList.contains('list-item')) next.focus();
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = div.previousElementSibling;
+        if (prev && prev.classList.contains('list-item')) prev.focus();
+      }
+    };
+    wrap.appendChild(div);
+  });
+  const first = wrap.querySelector('.list-item');
+  if (first) first.focus();
+}
+
+function renderLanguageList() {
+  renderList('lang-wrap', LANGUAGES, state.lang.tag, (item) => state.lang = item);
+}
+
+function renderTzList() {
+  renderList('tz-wrap', TIMEZONES, state.tz.tag, (item) => state.tz = item);
+}
+
+async function commitLanguage() {
+  const ok = await window.plasmatv.setLocale(state.lang.tag);
+  if (!ok) { alert('Failed to set locale'); return; }
+  goTo('region');
+}
+
+async function commitTimezone() {
+  const ok = await window.plasmatv.setTimezone(state.tz.tag);
+  if (!ok) { alert('Failed to set timezone'); return; }
+  goTo('wifi');
+}
+
+async function loadNets() {
+  const wrap = document.getElementById('nets-wrap');
+  const loading = document.getElementById('nets-loading');
+  loading.textContent = 'Scanning...';
+  wrap.innerHTML = '';
+  const empty = document.createElement('div');
+  empty.className = 'list-empty';
+  empty.id = 'nets-loading';
+  empty.textContent = 'Scanning...';
+  wrap.appendChild(empty);
+  const nets = await window.plasmatv.scanWifi();
+  wrap.innerHTML = '';
+  if (!nets || nets.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'list-empty';
+    empty.textContent = 'No networks found. Try again or skip.';
+    wrap.appendChild(empty);
+    return;
+  }
+  let firstItem = null;
+  nets.forEach(n => {
+    if (!n.ssid) return;
+    const div = document.createElement('div');
+    div.className = 'list-item';
+    div.tabIndex = 0;
+    div.onclick = () => selectNet(div, n.ssid);
+    div.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); div.click(); }
+      if (e.key === 'ArrowDown') { e.preventDefault(); const nx = div.nextElementSibling; if (nx) nx.focus(); }
+      if (e.key === 'ArrowUp') { e.preventDefault(); const pr = div.previousElementSibling; if (pr) pr.focus(); }
+    };
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = n.ssid;
+    div.appendChild(nameSpan);
+    const hint = document.createElement('span');
+    hint.className = 'hint';
+    hint.textContent = `${n.signal}%`;
+    div.appendChild(hint);
+    wrap.appendChild(div);
+    if (!firstItem) firstItem = div;
+  });
+  if (firstItem) firstItem.focus();
+}
+
+function selectNet(el, ssid) {
+  state.wifiSsid = ssid;
+  document.querySelectorAll('#nets-wrap .list-item').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('pw-box').style.display = 'flex';
+  document.getElementById('pw-input').focus();
+  document.getElementById('wifi-error').classList.remove('show');
+}
+
+async function connectWifi() {
+  const pw = document.getElementById('pw-input').value;
+  const errorEl = document.getElementById('wifi-error');
+  errorEl.classList.remove('show');
+  const ok = await window.plasmatv.connectWifi(state.wifiSsid, pw);
+  if (ok) {
+    goTo('appearance');
+  } else {
+    errorEl.textContent = 'Could not connect. Check the password and try again.';
+    errorEl.classList.add('show');
+  }
+}
+
+function selectTheme(which) {
+  state.theme = which;
+  document.getElementById('swatch-dark').classList.toggle('selected', which === 'dark');
+  document.getElementById('swatch-light').classList.toggle('selected', which === 'light');
+}
+
+async function commitTheme() {
+  const lookAndFeelId = state.theme === 'dark'
+    ? 'org.kde.breezedark.desktop'
+    : 'org.kde.breeze.desktop';
+  const ok = await window.plasmatv.setTheme(lookAndFeelId);
+  if (!ok) { alert('Failed to set theme'); return; }
+  goTo('review');
+}
+
+function fillReview() {
+  document.getElementById('review-lang').textContent = state.lang.label;
+  document.getElementById('review-tz').textContent = state.tz.label;
+  document.getElementById('review-wifi').textContent = state.wifiSsid || 'Skipped';
+  document.getElementById('review-theme').textContent = state.theme === 'dark' ? 'Dark' : 'Light';
+}
+
+async function commitAll() {
+  const lookAndFeelId = state.theme === 'dark'
+    ? 'org.kde.breezedark.desktop'
+    : 'org.kde.breeze.desktop';
+  await window.plasmatv.setLocale(state.lang.tag);
+  await window.plasmatv.setTimezone(state.tz.tag);
+  await window.plasmatv.setTheme(lookAndFeelId);
+  goTo('finish');
+}
+
+renderProgress(0);
+</script>
+</body>
+</html>

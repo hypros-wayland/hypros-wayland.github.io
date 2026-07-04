@@ -1,0 +1,8 @@
+{
+  "tv-user": {
+    "displayName": "TV User",
+    "type": "adult",
+    "avatar": "tv-user.png",
+    "pinProtected": false
+  }
+}

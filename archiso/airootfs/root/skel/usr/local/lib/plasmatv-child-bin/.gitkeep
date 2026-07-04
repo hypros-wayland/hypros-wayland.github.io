@@ -1,0 +1,3 @@
+Populated by install.sh with symlinks to the small set of commands a child
+session is allowed to run directly (electron, the bigscreen shell, and
+plasmatv-* helper scripts). Kept empty here since real binary paths vary.

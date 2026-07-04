@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Sling TV
+Comment=Watch Sling TV
+Exec=electron /opt/plasmatv-apps/streaming-slingtv
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

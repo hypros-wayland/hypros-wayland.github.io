@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# plasmatv-clear-pin <username> — root only.
+set -euo pipefail
+[ "$(id -u)" -eq 0 ] || { echo "must run as root" >&2; exit 1; }
+PUBLIC=/etc/plasmatv/users-public.json
+SECRETS=/etc/plasmatv/users-secrets.json
+user=$1
+jq --arg u "$user" 'del(.[$u])' "$SECRETS" > /tmp/sec.$$ 2>/dev/null && mv /tmp/sec.$$ "$SECRETS" || true
+jq --arg u "$user" '.[$u].pinProtected = false' "$PUBLIC" > /tmp/pub.$$ && mv /tmp/pub.$$ "$PUBLIC"
+echo "PIN cleared for $user"

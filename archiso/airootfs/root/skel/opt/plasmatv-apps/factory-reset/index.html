@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  body { margin:0; height:100vh; background:#0f0f14; color:#f2f2f2; font-family:sans-serif;
+    display:flex; align-items:center; justify-content:center; }
+  .box { text-align:center; max-width:420px; }
+  h1 { font-weight:300; color:#f87171; }
+  button { padding:.7rem 1.4rem; border-radius:8px; border:none; font-size:1rem;
+    cursor:pointer; margin:.4rem; }
+  .go { background:#dc2626; color:white; }
+  .cancel { background:#374151; color:white; }
+</style></head>
+<body>
+  <div class="box">
+    <h1>Factory Reset</h1>
+    <p>This removes <strong>all child profiles</strong>, PINs, and screen-time data,
+       then reboots into first-time setup. This cannot be undone.</p>
+    <div id="confirm">
+      <button class="cancel" onclick="window.close()">Cancel</button>
+      <button class="go" onclick="doReset()">Erase & Reset</button>
+    </div>
+    <p id="status"></p>
+  </div>
+<script>
+  async function doReset() {
+    document.getElementById('status').textContent = 'Resetting...';
+    const ok = await window.plasmatv.factoryReset();
+    document.getElementById('status').textContent = ok ? 'Rebooting...' : 'Failed — see logs.';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "streaming-plutotv",
+  "version": "1.0.0",
+  "description": "Title-bar-less kiosk wrapper for Pluto TV, launched from Bigscreen",
+  "main": "main.js",
+  "private": true
+}

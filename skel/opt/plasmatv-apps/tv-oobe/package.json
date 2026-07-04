@@ -1,0 +1,7 @@
+{
+  "name": "tv-oobe",
+  "version": "1.0.0",
+  "description": "PlasmaTV first-boot out-of-box-experience wizard",
+  "main": "main.js",
+  "private": true
+}

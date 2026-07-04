@@ -1,0 +1,7 @@
+{
+  "name": "streaming-crunchyroll",
+  "version": "1.0.0",
+  "description": "Title-bar-less kiosk wrapper for Crunchyroll, launched from Bigscreen",
+  "main": "main.js",
+  "private": true
+}

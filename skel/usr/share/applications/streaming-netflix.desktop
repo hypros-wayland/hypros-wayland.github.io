@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Netflix
+Comment=Watch Netflix
+Exec=electron /opt/plasmatv-apps/streaming-netflix
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

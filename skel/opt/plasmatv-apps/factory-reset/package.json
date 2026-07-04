@@ -1,0 +1,7 @@
+{
+  "name": "plasmatv-factory-reset",
+  "version": "1.0.0",
+  "description": "PlasmaTV factory reset — adult-only",
+  "main": "main.js",
+  "private": true
+}

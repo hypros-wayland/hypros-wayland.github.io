@@ -1,0 +1,7 @@
+{
+  "name": "streaming-slingtv",
+  "version": "1.0.0",
+  "description": "Title-bar-less kiosk wrapper for Sling TV, launched from Bigscreen",
+  "main": "main.js",
+  "private": true
+}

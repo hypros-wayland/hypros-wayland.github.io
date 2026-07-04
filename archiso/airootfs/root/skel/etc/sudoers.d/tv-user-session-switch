@@ -1,0 +1,3 @@
+# Let tv-user flip SDDM sessions and restart the display manager without a
+# password prompt (there's usually no keyboard attached to a TV).
+tv-user ALL=(root) NOPASSWD: /usr/bin/sed -i * /etc/sddm.conf.d/autologin.conf, /usr/bin/systemctl restart sddm

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Deezer
+Comment=Watch Deezer
+Exec=electron /opt/plasmatv-apps/streaming-deezer
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

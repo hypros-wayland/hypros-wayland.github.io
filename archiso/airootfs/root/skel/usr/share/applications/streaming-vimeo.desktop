@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Vimeo
+Comment=Watch Vimeo
+Exec=electron /opt/plasmatv-apps/streaming-vimeo
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

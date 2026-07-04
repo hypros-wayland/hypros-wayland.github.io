@@ -1,0 +1,7 @@
+{
+  "name": "streaming-amazonmusic",
+  "version": "1.0.0",
+  "description": "Title-bar-less kiosk wrapper for Amazon Music, launched from Bigscreen",
+  "main": "main.js",
+  "private": true
+}

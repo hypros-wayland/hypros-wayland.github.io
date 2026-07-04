@@ -1,0 +1,8 @@
+# tv-user (the default adult account) can manage child profiles, PINs,
+# and factory reset. Child accounts get NO entry here, and rbash blocks
+# them from invoking sudo at all in practice — this file is the backstop.
+tv-user ALL=(root) NOPASSWD: \
+  /usr/local/sbin/plasmatv-manage-child-user *, \
+  /usr/local/sbin/plasmatv-set-pin *, \
+  /usr/local/sbin/plasmatv-clear-pin *, \
+  /usr/local/sbin/plasmatv-factory-reset

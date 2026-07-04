@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=YouTube
+Comment=Watch YouTube
+Exec=electron /opt/plasmatv-apps/streaming-youtube
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

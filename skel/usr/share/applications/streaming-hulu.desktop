@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Hulu
+Comment=Watch Hulu
+Exec=electron /opt/plasmatv-apps/streaming-hulu
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

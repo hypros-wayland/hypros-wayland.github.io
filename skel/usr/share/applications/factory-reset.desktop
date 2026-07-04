@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Factory Reset
+Comment=Erase all profiles and reset PlasmaTV to defaults
+Exec=electron /opt/plasmatv-apps/factory-reset
+Icon=edit-clear-all
+Categories=System;Settings;

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=fuboTV
+Comment=Watch fuboTV
+Exec=electron /opt/plasmatv-apps/streaming-fubotv
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

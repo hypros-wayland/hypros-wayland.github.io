@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Amazon Music
+Comment=Watch Amazon Music
+Exec=electron /opt/plasmatv-apps/streaming-amazonmusic
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

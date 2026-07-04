@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=PlasmaTV User Selector
+Comment=Kiosk session that only shows the PlasmaTV user selector
+Exec=/usr/local/bin/plasmatv-selector-session

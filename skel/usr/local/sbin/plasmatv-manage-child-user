@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+# plasmatv-manage-child-user <create|delete|set-name|set-limit|list> [args...]
+# Root only. Manages child-user-0 .. child-user-15 Linux accounts and keeps
+# /etc/plasmatv/users-public.json in sync.
+set -euo pipefail
+
+PUBLIC=/etc/plasmatv/users-public.json
+SECRETS=/etc/plasmatv/users-secrets.json
+
+[ "$(id -u)" -eq 0 ] || { echo "must run as root" >&2; exit 1; }
+
+valid_slot() {
+    [[ "$1" =~ ^child-user-([0-9]|1[0-5])$ ]]
+}
+
+cmd=${1:-}
+case "$cmd" in
+
+  create)
+    slot=$2; displayname=$3; limit=${4:-60}
+    valid_slot "$slot" || { echo "invalid slot: $slot (use child-user-0..15)" >&2; exit 1; }
+    id "$slot" &>/dev/null && { echo "already exists" >&2; exit 1; }
+
+    useradd -m -s /usr/local/bin/plasmatv-rbash "$slot"
+    passwd -l "$slot" >/dev/null   # no direct password login — only via selector
+
+    jq --arg n "$displayname" --arg l "$limit" \
+      ".\"$slot\" = {\"displayName\": \$n, \"type\": \"child\", \"avatar\": \"child-default.png\", \"pinProtected\": false, \"dailyLimitMinutes\": (\$l|tonumber)}" \
+      "$PUBLIC" > /tmp/pub.$$ && mv /tmp/pub.$$ "$PUBLIC"
+
+    # give this session a "return to selector on logout" hook
+    install -d -m755 "/home/$slot/.config/systemd/user/graphical-session.target.wants"
+    ln -sf /etc/plasmatv/skel-user-units/plasmatv-return-to-selector.service \
+      "/home/$slot/.config/systemd/user/graphical-session.target.wants/plasmatv-return-to-selector.service" 2>/dev/null || true
+    chown -R "$slot:$slot" "/home/$slot/.config" 2>/dev/null || true
+
+    mkdir -p "/var/lib/plasmatv/screentime"
+    echo '{"date":"","minutes":0}' > "/var/lib/plasmatv/screentime/$slot.json"
+
+    /usr/local/sbin/plasmatv-dns-rules
+
+    echo "created $slot ($displayname), daily limit ${limit}m"
+    ;;
+
+  delete)
+    slot=$2
+    valid_slot "$slot" || { echo "invalid slot" >&2; exit 1; }
+    id "$slot" &>/dev/null || { echo "no such user" >&2; exit 1; }
+
+    userdel -r "$slot" 2>/dev/null || userdel "$slot"
+    jq "del(.\"$slot\")" "$PUBLIC" > /tmp/pub.$$ && mv /tmp/pub.$$ "$PUBLIC"
+    jq "del(.\"$slot\")" "$SECRETS" > /tmp/sec.$$ 2>/dev/null && mv /tmp/sec.$$ "$SECRETS" || true
+    rm -f "/var/lib/plasmatv/screentime/$slot.json"
+    /usr/local/sbin/plasmatv-dns-rules
+    echo "deleted $slot"
+    ;;
+
+  set-name)
+    slot=$2; displayname=$3
+    valid_slot "$slot" || exit 1
+    jq --arg n "$displayname" ".\"$slot\".displayName = \$n" "$PUBLIC" > /tmp/pub.$$ && mv /tmp/pub.$$ "$PUBLIC"
+    ;;
+
+  set-limit)
+    slot=$2; minutes=$3
+    valid_slot "$slot" || exit 1
+    jq --argjson m "$minutes" ".\"$slot\".dailyLimitMinutes = \$m" "$PUBLIC" > /tmp/pub.$$ && mv /tmp/pub.$$ "$PUBLIC"
+    ;;
+
+  list)
+    jq -r 'to_entries[] | select(.value.type=="child") | "\(.key)\t\(.value.displayName)\t\(.value.dailyLimitMinutes)m"' "$PUBLIC"
+    ;;
+
+  *)
+    echo "usage: $0 {create|delete|set-name|set-limit|list} ..." >&2
+    exit 1
+    ;;
+esac

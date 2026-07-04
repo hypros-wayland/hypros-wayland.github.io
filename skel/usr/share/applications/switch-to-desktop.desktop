@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Switch to Desktop
+Comment=Restart into a normal Plasma Desktop session
+Exec=/usr/local/bin/switch-to-desktop
+Icon=preferences-desktop
+Categories=System;

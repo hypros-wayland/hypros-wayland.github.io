@@ -1,0 +1,7 @@
+{
+  "name": "streaming-twitch",
+  "version": "1.0.0",
+  "description": "Title-bar-less kiosk wrapper for Twitch, launched from Bigscreen",
+  "main": "main.js",
+  "private": true
+}

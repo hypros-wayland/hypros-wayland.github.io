@@ -1,0 +1,4 @@
+# selector-user only needs to switch the active login and check PINs.
+# It is NEVER granted plasmatv-manage-child-user, plasmatv-factory-reset,
+# or plasmatv-set-pin — those stay adult-only (see plasmatv-adult).
+selector-user ALL=(root) NOPASSWD: /usr/local/sbin/plasmatv-login-as *, /usr/local/sbin/plasmatv-verify-pin *

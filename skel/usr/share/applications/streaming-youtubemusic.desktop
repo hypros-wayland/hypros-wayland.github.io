@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=YouTube Music
+Comment=Watch YouTube Music
+Exec=electron /opt/plasmatv-apps/streaming-youtubemusic
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

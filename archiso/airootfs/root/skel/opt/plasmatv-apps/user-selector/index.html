@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>PlasmaTV</title>
+<style>
+  html, body { margin:0; height:100%; background:#0f0f14; color:#f2f2f2;
+    font-family:"Noto Sans", sans-serif; display:flex; align-items:center;
+    justify-content:center; }
+  h1 { font-weight:300; font-size:2rem; margin-bottom:2rem; text-align:center; }
+  .grid { display:flex; gap:2rem; flex-wrap:wrap; justify-content:center; max-width:80vw; }
+  .tile { width:180px; cursor:pointer; text-align:center; }
+  .avatar { width:140px; height:140px; border-radius:50%; margin:0 auto .8rem;
+    display:flex; align-items:center; justify-content:center; font-size:3rem;
+    border: 3px solid transparent; }
+  .tile:hover .avatar, .tile:focus .avatar { border-color:#3b82f6; }
+  .avatar.adult { background: linear-gradient(160deg,#374151,#1f2937); }
+  .avatar.child { background: linear-gradient(160deg,#0ea5a0,#065f5b); }
+  .name { font-size:1.1rem; }
+  .lock { font-size:.85rem; opacity:.6; margin-top:.2rem; }
+
+  #pin-overlay { position:fixed; inset:0; background:rgba(10,10,14,.95);
+    display:none; align-items:center; justify-content:center; flex-direction:column; }
+  #pin-overlay.active { display:flex; }
+  #pin-dots { display:flex; gap:.8rem; margin: 1.2rem 0; }
+  #pin-dots span { width:16px; height:16px; border-radius:50%; background:#374151; }
+  #pin-dots span.filled { background:#3b82f6; }
+  .keypad { display:grid; grid-template-columns:repeat(3,70px); gap:.8rem; }
+  .keypad button { width:70px; height:70px; border-radius:50%; border:none;
+    background:#1f2937; color:white; font-size:1.4rem; cursor:pointer; }
+  .keypad button:hover { background:#374151; }
+  #pin-error { color:#f87171; height:1.2rem; margin-top:.6rem; }
+  #pin-cancel { margin-top:1rem; background:none; border:none; color:#93c5fd; cursor:pointer; }
+</style>
+</head>
+<body>
+  <div>
+    <h1>Who's watching?</h1>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <div id="pin-overlay">
+    <h1 id="pin-title">Enter PIN</h1>
+    <div id="pin-dots"></div>
+    <div id="pin-error"></div>
+    <div class="keypad" id="keypad"></div>
+    <button id="pin-cancel" onclick="closePin()">Cancel</button>
+  </div>
+
+<script>
+  let pendingUser = null;
+  let pinBuf = '';
+
+  async function loadUsers() {
+    const users = await window.plasmatv.listUsers();
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+
+    const order = Object.entries(users).sort(([, a], [, b]) => {
+      if (a.type === b.type) return 0;
+      return a.type === 'adult' ? -1 : 1;
+    });
+
+    order.forEach(([id, info]) => {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.tabIndex = 0;
+      const initial = (info.displayName || id).trim()[0]?.toUpperCase() || '?';
+      tile.innerHTML = `
+        <div class="avatar ${info.type}">${initial}</div>
+        <div class="name">${info.displayName || id}</div>
+        ${info.pinProtected ? '<div class="lock">🔒 PIN required</div>' : ''}
+      `;
+      tile.onclick = () => selectUser(id, info);
+      grid.appendChild(tile);
+    });
+  }
+
+  function selectUser(id, info) {
+    if (info.pinProtected) {
+      openPin(id, info.displayName || id);
+    } else {
+      window.plasmatv.login(id);
+    }
+  }
+
+  function openPin(user, label) {
+    pendingUser = user;
+    pinBuf = '';
+    document.getElementById('pin-title').textContent = `Enter PIN for ${label}`;
+    document.getElementById('pin-error').textContent = '';
+    renderDots();
+    const keypad = document.getElementById('keypad');
+    keypad.innerHTML = '';
+    ['1','2','3','4','5','6','7','8','9','','0','⌫'].forEach(k => {
+      const btn = document.createElement('button');
+      btn.textContent = k;
+      if (k === '') { btn.style.visibility = 'hidden'; }
+      else btn.onclick = () => pressKey(k);
+      keypad.appendChild(btn);
+    });
+    document.getElementById('pin-overlay').classList.add('active');
+  }
+
+  function closePin() {
+    document.getElementById('pin-overlay').classList.remove('active');
+    pendingUser = null;
+    pinBuf = '';
+  }
+
+  function renderDots() {
+    const dots = document.getElementById('pin-dots');
+    dots.innerHTML = '';
+    for (let i = 0; i < 8; i++) {
+      const span = document.createElement('span');
+      if (i < pinBuf.length) span.classList.add('filled');
+      if (i >= 4 && i >= pinBuf.length && pinBuf.length < 4) span.style.opacity = '0.3';
+      dots.appendChild(span);
+    }
+  }
+
+  async function pressKey(k) {
+    if (k === '⌫') { pinBuf = pinBuf.slice(0, -1); renderDots(); return; }
+    if (pinBuf.length >= 8) return;
+    pinBuf += k;
+    renderDots();
+    if (pinBuf.length >= 4) {
+      const ok = await window.plasmatv.verifyPin(pendingUser, pinBuf);
+      if (ok) {
+        window.plasmatv.login(pendingUser);
+      } else if (pinBuf.length >= 8) {
+        document.getElementById('pin-error').textContent = 'Incorrect PIN';
+        pinBuf = '';
+        renderDots();
+      }
+    }
+  }
+
+  loadUsers();
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "plasmatv-screentime-blocker",
+  "version": "1.0.0",
+  "description": "Unclosable screen-time-ended overlay, only a power-off button",
+  "main": "main.js",
+  "private": true
+}

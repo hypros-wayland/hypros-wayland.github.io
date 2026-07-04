@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Twitch
+Comment=Watch Twitch
+Exec=electron /opt/plasmatv-apps/streaming-twitch
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

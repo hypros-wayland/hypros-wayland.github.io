@@ -1,0 +1,43 @@
+[Unit]
+Description=Apply PlasmaTV child-account DNS redirect rules
+After=network-pre.target
+Before=network.target
+Wants=network-pre.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/plasmatv-dns-rules
+RemainAfterExit=yes
+
+# --- sandboxing (systemd's own MAC-adjacent controls, no SELinux needed) ---
+# This only needs to read one JSON file and manipulate netfilter — nothing
+# else. NET_ADMIN/NET_RAW for iptables; everything else locked down.
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+# @system-service is systemd's own curated "safe for a system daemon"
+# allow-list — broad enough for iptables' netlink calls without opening up
+# @privileged/@mount/@reboot etc. Verify with:
+#   systemd-analyze security plasmatv-dns-rules.service
+# and tighten further (or loosen, if it breaks) based on the exposure score.
+
+[Install]
+WantedBy=multi-user.target

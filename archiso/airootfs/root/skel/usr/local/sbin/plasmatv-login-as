@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# plasmatv-login-as <username>
+# Root only, called by selector-user (via sudoers) once a PIN check (if
+# any) has already passed. Points SDDM's autologin at the chosen user and
+# restarts the display manager, which logs them straight in.
+set -euo pipefail
+[ "$(id -u)" -eq 0 ] || { echo "must run as root" >&2; exit 1; }
+
+user=$1
+id "$user" &>/dev/null || { echo "no such user: $user" >&2; exit 1; }
+
+session="plasma-bigscreen.desktop"
+
+sed -i "s/^User=.*/User=$user/" /etc/sddm.conf.d/autologin.conf
+sed -i "s/^Session=.*/Session=$session/" /etc/sddm.conf.d/autologin.conf
+systemctl restart sddm

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Paramount+
+Comment=Watch Paramount+
+Exec=electron /opt/plasmatv-apps/streaming-paramountplus
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

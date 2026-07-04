@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Switch to Bigscreen
+Comment=Restart into the Plasma Bigscreen TV session
+Exec=/usr/local/bin/switch-to-bigscreen
+Icon=video-television
+Categories=System;

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlasmaTV Linux — A TV-first Arch Linux distro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      background: #0a0a0f;
+      color: #e8e8ed;
+      line-height: 1.6;
+    }
+    a { color: #60a5fa; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+    /* Nav */
+    nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.2rem 2rem; background: rgba(10,10,15,.85); backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #1a1a24;
+    }
+    nav .logo { font-weight: 700; font-size: 1.2rem; color: #f0f0f0; letter-spacing: -.02em; }
+    nav .logo span { color: #60a5fa; }
+    nav a { color: #a0a0a8; margin-left: 1.8rem; font-size: .9rem; font-weight: 500; }
+    nav a:hover { color: #f0f0f0; text-decoration: none; }
+
+    /* Hero */
+    .hero {
+      padding: 6rem 0 5rem; text-align: center;
+      background: radial-gradient(ellipse at 50% 0%, #141425 0%, #0a0a0f 70%);
+    }
+    .hero h1 { font-size: 3.4rem; font-weight: 700; letter-spacing: -.03em; margin-bottom: .6rem; background: linear-gradient(135deg,#f0f0f0 0%,#60a5fa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.2rem; color: #888; max-width: 600px; margin: 0 auto 2rem; }
+    .hero .btn {
+      display: inline-block; background: #2563eb; color: #fff; padding: .9rem 2.4rem;
+      border-radius: 12px; font-weight: 600; font-size: 1.05rem;
+      transition: background .15s, transform .1s; border: none; cursor: pointer;
+    }
+    .hero .btn:hover { background: #3b82f6; transform: translateY(-1px); text-decoration: none; }
+    .hero .btn.secondary { background: #1f1f2e; margin-left: .8rem; }
+    .hero .btn.secondary:hover { background: #2a2a3e; }
+    .hero .badge {
+      display: inline-block; background: #1a1a2e; color: #60a5fa; font-size: .8rem;
+      padding: .3rem .9rem; border-radius: 20px; margin-bottom: 1.2rem;
+      border: 1px solid #2a2a4e;
+    }
+
+    /* Sections */
+    section { padding: 4.5rem 0; }
+    section h2 { font-size: 2rem; font-weight: 600; letter-spacing: -.02em; margin-bottom: 1rem; }
+    section .sub { color: #888; font-size: 1.05rem; margin-bottom: 2.5rem; max-width: 500px; }
+
+    /* Features */
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
+    .feature {
+      background: #11111a; border: 1px solid #1a1a24; border-radius: 14px;
+      padding: 1.8rem; transition: border-color .15s;
+    }
+    .feature:hover { border-color: #2a2a3e; }
+    .feature .icon { font-size: 1.8rem; margin-bottom: .6rem; }
+    .feature h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: .4rem; }
+    .feature p { font-size: .9rem; color: #888; line-height: 1.5; }
+
+    /* Streaming grid */
+    .streaming-grid { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.5rem; }
+    .streaming-grid span {
+      background: #1a1a24; border: 1px solid #22222e; border-radius: 8px;
+      padding: .4rem 1rem; font-size: .85rem; color: #aaa;
+    }
+
+    /* Download */
+    .download-box {
+      background: #11111a; border: 1px solid #1a1a24; border-radius: 14px;
+      padding: 2rem; display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .download-box .info h3 { font-size: 1.2rem; font-weight: 600; }
+    .download-box .info p { color: #888; font-size: .9rem; }
+    .download-box .btn { background: #2563eb; color: #fff; padding: .8rem 2rem; border-radius: 10px; font-weight: 600; white-space: nowrap; }
+    .download-box .btn:hover { background: #3b82f6; text-decoration: none; }
+    .iso-meta { margin-top: 1rem; display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: .85rem; color: #666; }
+
+    /* Quick start */
+    .steps { display: flex; flex-direction: column; gap: 1rem; }
+    .step {
+      display: flex; gap: 1.2rem; align-items: flex-start;
+      background: #11111a; border: 1px solid #1a1a24; border-radius: 12px; padding: 1.2rem 1.5rem;
+    }
+    .step .num {
+      background: #1a1a2e; color: #60a5fa; width: 32px; height: 32px;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .9rem; flex-shrink: 0;
+    }
+    .step .text { font-size: .95rem; color: #ccc; }
+    .step .text code { background: #1a1a24; padding: .15rem .5rem; border-radius: 4px; font-size: .85rem; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid #1a1a24; padding: 2rem 0; text-align: center;
+      color: #555; font-size: .85rem;
+    }
+    footer a { color: #777; }
+
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 2.2rem; }
+      nav a { margin-left: 1rem; font-size: .8rem; }
+      .download-box { flex-direction: column; align-items: stretch; text-align: center; }
+      .download-box .btn { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">Plasma<span>TV</span></div>
+    <div>
+      <a href="#features">Features</a>
+      <a href="#download">Download</a>
+      <a href="#quickstart">Quick start</a>
+      <a href="https://github.com/plasmatv-linux/PlasmaTV-Linux" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="badge">Arch Linux + KDE Plasma Bigscreen</div>
+      <h1>PlasmaTV Linux</h1>
+      <p>A TV-first operating system. Boots straight into Plasma Bigscreen, with a full Plasma Desktop one click away.</p>
+      <a href="#download" class="btn">Download the ISO</a>
+      <a href="#features" class="btn secondary">Learn more</a>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="container">
+      <h2>Built for the big screen</h2>
+      <p class="sub">Everything you expect from a smart TV, powered by Arch Linux and KDE Plasma.</p>
+      <div class="features">
+        <div class="feature">
+          <div class="icon">📺</div>
+          <h3>Plasma Bigscreen</h3>
+          <p>KDE's TV-optimized 10-foot UI. Navigate with a remote or keyboard from the couch.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🖥️</div>
+          <h3>Full desktop</h3>
+          <p>Switch to the classic Plasma Desktop anytime. One click, no reboot.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">📦</div>
+          <h3>25 streaming apps</h3>
+          <p>Netflix, YouTube, Spotify, Disney+, Prime Video, and more — each a native-feeling kiosk app.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🔐</div>
+          <h3>Parental controls</h3>
+          <p>Child accounts with PIN locks, screen time limits, DNS filtering, and a restricted shell.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">⚡</div>
+          <h3>Instant boot</h3>
+          <p>Plymouth splash, auto-login, straight to the user selector. No delays, no login prompts.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🐧</div>
+          <h3>Arch Linux base</h3>
+          <p>Rolling release, AUR access, full pacman ecosystem. All the power of Arch under the TV.</p>
+        </div>
+      </div>
+
+      <h3 style="margin-top:3rem; font-weight:500; color:#888;">Pre-configured streaming apps</h3>
+      <div class="streaming-grid">
+        <span>Netflix</span><span>YouTube</span><span>YouTube Music</span><span>Disney+</span>
+        <span>Prime Video</span><span>Max</span><span>Hulu</span><span>Apple TV</span>
+        <span>Paramount+</span><span>Twitch</span><span>Spotify</span><span>Peacock</span>
+        <span>Crunchyroll</span><span>Plex</span><span>Tubi</span><span>Pluto TV</span>
+        <span>Discovery+</span><span>ESPN</span><span>Vimeo</span><span>Amazon Music</span>
+        <span>Deezer</span><span>SoundCloud</span><span>Sling TV</span><span>fuboTV</span>
+        <span>DAZN</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="download">
+    <div class="container">
+      <h2>Get PlasmaTV Linux</h2>
+      <p class="sub">Free and open source. Download the ISO and install on any x86_64 machine.</p>
+      <div class="download-box">
+        <div class="info">
+          <h3>PlasmaTV Linux 2026.07.03</h3>
+          <p>Live ISO — boot, install, enjoy. 2.1 GB</p>
+        </div>
+        <a class="btn" href="https://sourceforge.net/projects/plasmatv-linux/files/latest/download" target="_blank">Download from SourceForge</a>
+      </div>
+      <div class="iso-meta">
+        <span>🔗 SHA256: <code style="color:#888;font-size:.8rem;">—</code></span>
+        <span>📅 Built: 2026-07-03</span>
+        <span>🏗️ Kernel: Linux 7.x</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="quickstart">
+    <div class="container">
+      <h2>Quick start</h2>
+      <p class="sub">From ISO to PlasmaTV in a few minutes.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <div class="text">Download the ISO and write it to a USB drive: <code>sudo dd if=plasmatv-linux.iso of=/dev/sdX bs=4M status=progress</code></div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="text">Boot from the USB. The installer starts automatically on tty1.</div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="text">Follow the dialog prompts — pick a disk, set up networking, and confirm the install.</div>
+        </div>
+        <div class="step">
+          <div class="num">4</div>
+          <div class="text">Reboot, complete the TV OOBE wizard (language, Wi-Fi, theme), and enjoy PlasmaTV.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><a href="https://github.com/plasmatv-linux/PlasmaTV-Linux">GitHub</a> &middot; Built with Arch Linux, KDE Plasma, and Electron.</p>
+    </div>
+  </footer>
+</body>
+</html>

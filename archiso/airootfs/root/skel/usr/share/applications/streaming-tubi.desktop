@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Tubi
+Comment=Watch Tubi
+Exec=electron /opt/plasmatv-apps/streaming-tubi
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

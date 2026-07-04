@@ -1,0 +1,5 @@
+# Every logged-in user (adult or child) is allowed to trigger the
+# return-to-selector hook on logout — this is what makes SDDM land back
+# on the user selector instead of re-showing whichever account just
+# logged out. Narrowly scoped to that one command.
+ALL ALL=(root) NOPASSWD: /usr/local/sbin/plasmatv-return-to-selector

@@ -1,0 +1,7 @@
+{
+  "name": "streaming-dazn",
+  "version": "1.0.0",
+  "description": "Title-bar-less kiosk wrapper for DAZN, launched from Bigscreen",
+  "main": "main.js",
+  "private": true
+}

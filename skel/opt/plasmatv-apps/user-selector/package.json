@@ -1,0 +1,7 @@
+{
+  "name": "plasmatv-user-selector",
+  "version": "1.0.0",
+  "description": "PlasmaTV user selector — the whole 'session' for selector-user",
+  "main": "main.js",
+  "private": true
+}

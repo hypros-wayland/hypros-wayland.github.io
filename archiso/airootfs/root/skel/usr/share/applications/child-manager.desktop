@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Parental Controls
+Comment=Manage child profiles, time limits, and PINs
+Exec=electron /opt/plasmatv-apps/child-manager
+Icon=preferences-system-users
+Categories=System;Settings;

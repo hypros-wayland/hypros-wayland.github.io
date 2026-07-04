@@ -1,0 +1,29 @@
+[Unit]
+Description=PlasmaTV first-boot OOBE wizard
+ConditionPathExists=/etc/plasmatv-first-boot
+After=sddm.service graphical.target
+Wants=graphical.target
+
+[Service]
+Type=simple
+User=tv-user
+Environment=DISPLAY=:0
+Environment=WAYLAND_DISPLAY=wayland-0
+ExecStart=/usr/bin/electron /opt/plasmatv-apps/tv-oobe
+Restart=no
+
+# --- light sandboxing ---
+# This is a real GUI app (Electron, needs GPU/compositor access, D-Bus,
+# network for Wi-Fi/NTP-ish checks), so this is intentionally much looser
+# than the headless daemons above — just the uncontroversial baseline.
+NoNewPrivileges=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+
+[Install]
+WantedBy=graphical.target

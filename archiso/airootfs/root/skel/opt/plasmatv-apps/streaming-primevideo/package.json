@@ -1,0 +1,7 @@
+{
+  "name": "streaming-primevideo",
+  "version": "1.0.0",
+  "description": "Title-bar-less kiosk wrapper for Prime Video, launched from Bigscreen",
+  "main": "main.js",
+  "private": true
+}

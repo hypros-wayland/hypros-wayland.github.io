@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# plasmatv-factory-reset — root only. Deletes every child-user-* account,
+# clears PINs, resets configs to defaults, re-arms the first-boot OOBE,
+# and reboots. Deliberately NOT callable by child accounts (enforced both
+# by sudoers scoping and by the calling app refusing to run as one).
+set -euo pipefail
+[ "$(id -u)" -eq 0 ] || { echo "must run as root" >&2; exit 1; }
+
+PUBLIC=/etc/plasmatv/users-public.json
+
+if [ -f "$PUBLIC" ]; then
+    jq -r 'to_entries[] | select(.value.type=="child") | .key' "$PUBLIC" | while read -r slot; do
+        /usr/local/sbin/plasmatv-manage-child-user delete "$slot" || true
+    done
+fi
+
+# reset the public/secret user stores back to just tv-user, no PIN
+cat > "$PUBLIC" << 'EOF'
+{
+  "tv-user": {
+    "displayName": "TV User",
+    "type": "adult",
+    "avatar": "tv-user.png",
+    "pinProtected": false
+  }
+}
+EOF
+echo '{}' > /etc/plasmatv/users-secrets.json
+chmod 600 /etc/plasmatv/users-secrets.json
+
+rm -f /var/lib/plasmatv/screentime/*.json
+
+# re-arm first-boot OOBE and point autologin back at the selector
+touch /etc/plasmatv-first-boot
+sed -i "s/^User=.*/User=selector-user/" /etc/sddm.conf.d/autologin.conf
+sed -i "s/^Session=.*/Session=plasmatv-selector.desktop/" /etc/sddm.conf.d/autologin.conf
+
+systemctl reboot

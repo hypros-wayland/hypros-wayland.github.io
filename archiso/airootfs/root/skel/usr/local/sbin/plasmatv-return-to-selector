@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# plasmatv-return-to-selector
+# Root only. Points SDDM's autologin back at selector-user and restarts
+# it. Triggered from each user's systemd --user session on logout (see
+# skel-user-units/plasmatv-return-to-selector.service), and also usable
+# manually (e.g. a "Log out" button inside a session).
+set -euo pipefail
+[ "$(id -u)" -eq 0 ] || { echo "must run as root" >&2; exit 1; }
+
+sed -i "s/^User=.*/User=selector-user/" /etc/sddm.conf.d/autologin.conf
+sed -i "s/^Session=.*/Session=plasmatv-selector.desktop/" /etc/sddm.conf.d/autologin.conf
+systemctl restart sddm

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# plasmatv-dns-rules — root only, run at boot (see
+# plasmatv-dns-rules.service). iptables NAT rules aren't persistent across
+# reboots by default, so this reapplies the child-user DNS redirect
+# (-> 1.1.1.3, Cloudflare for Families) for every child account currently
+# listed in /etc/plasmatv/users-public.json.
+#
+# Uses a dedicated chain (PLASMATV_CHILD_DNS) so re-running this script is
+# idempotent: we just flush and rebuild the chain instead of trying to
+# match/delete individual OUTPUT rules.
+#
+# Caveat: this is UID-based NAT, IPv4 only, and doesn't stop a
+# tech-savvy kid from using DNS-over-HTTPS to bypass it — treat it as a
+# baseline filter, not a hard guarantee.
+set -euo pipefail
+[ "$(id -u)" -eq 0 ] || { echo "must run as root" >&2; exit 1; }
+
+PUBLIC=/etc/plasmatv/users-public.json
+CHILDDNS="1.1.1.3"
+CHAIN="PLASMATV_CHILD_DNS"
+
+iptables -t nat -nL "$CHAIN" >/dev/null 2>&1 || iptables -t nat -N "$CHAIN"
+iptables -t nat -C OUTPUT -j "$CHAIN" 2>/dev/null || iptables -t nat -I OUTPUT -j "$CHAIN"
+iptables -t nat -F "$CHAIN"
+
+[ -f "$PUBLIC" ] || exit 0
+jq -r 'to_entries[] | select(.value.type=="child") | .key' "$PUBLIC" | while read -r slot; do
+    id "$slot" &>/dev/null || continue
+    uid=$(id -u "$slot")
+    iptables -t nat -A "$CHAIN" -m owner --uid-owner "$uid" -p udp --dport 53 -j DNAT --to-destination "$CHILDDNS"
+    iptables -t nat -A "$CHAIN" -m owner --uid-owner "$uid" -p tcp --dport 53 -j DNAT --to-destination "$CHILDDNS"
+done

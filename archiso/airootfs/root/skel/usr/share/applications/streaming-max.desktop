@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Max
+Comment=Watch Max
+Exec=electron /opt/plasmatv-apps/streaming-max
+Icon=video-television
+Categories=AudioVideo;Video;
+X-Plasma-Bigscreen=true

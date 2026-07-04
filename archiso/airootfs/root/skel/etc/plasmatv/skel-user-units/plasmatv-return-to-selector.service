@@ -1,0 +1,20 @@
+[Unit]
+Description=Return SDDM autologin to the PlasmaTV user selector on logout
+# Bound to graphical-session.target, NOT default.target. default.target is
+# reached for the whole user session lifecycle in ways that don't map
+# cleanly onto "the graphical session actually started/ended" — it can
+# get reached/re-evaluated independent of Plasma's own session state,
+# which was causing ExecStop to fire almost immediately after login
+# (logging the user straight back out). graphical-session.target is the
+# target Plasma itself starts once the session is genuinely up and stops
+# on logout, so PartOf= here gives us the correct, well-defined hook.
+PartOf=graphical-session.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/true
+ExecStop=/usr/bin/sudo /usr/local/sbin/plasmatv-return-to-selector
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,8 @@
+#!/bin/bash --restricted
+# Login shell for child-user-* accounts. `bash --restricted` (rbash):
+# - can't `cd`
+# - can't set/unset PATH, SHELL, ENV, BASH_ENV
+# - can't run any command containing a `/`
+# - can't redirect output with > >| <> >>
+# Combined with the locked-down PATH in /etc/profile.d/plasmatv-child-path.sh
+# this limits child accounts to a small allowlisted set of commands.

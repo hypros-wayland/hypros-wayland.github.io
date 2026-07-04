@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Flip SDDM's autologin session to normal Plasma Desktop and re-login.
+set -e
+
+case "$(whoami)" in
+  child-user-*)
+    notify-send "PlasmaTV" "Desktop mode isn't available on child accounts." 2>/dev/null || \
+      echo "Desktop mode isn't available on child accounts." >&2
+    exit 1
+    ;;
+esac
+
+sudo sed -i 's/^Session=.*/Session=plasma.desktop/' /etc/sddm.conf.d/autologin.conf
+notify-send "PlasmaTV" "Switching to Desktop mode..." 2>/dev/null || true
+sudo systemctl restart sddm

@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# plasmatv-timelimit-daemon — root only, run as a long-lived systemd
+# service (see plasmatv-timelimit-daemon.service). Every 60s: for each
+# logged-in child user, adds a minute to their daily counter and, once
+# they hit their configured limit, launches the unclosable screen-time-
+# ended app inside their session.
+#
+# NOTE ON SCOPE: reliably injecting a GUI app into another user's active
+# Wayland session from a root daemon is genuinely fiddly (DISPLAY /
+# WAYLAND_DISPLAY / XDG_RUNTIME_DIR vary by session). This uses
+# `machinectl shell` against the user's own systemd --user instance,
+# which is the standard way to do it, but treat this as a scaffold to
+# verify against whatever session type plasma-bigscreen actually starts
+# on your hardware.
+set -uo pipefail
+
+PUBLIC=/etc/plasmatv/users-public.json
+SCREENTIME_DIR=/var/lib/plasmatv/screentime
+BLOCKER=/opt/plasmatv-apps/screentime-blocker
+
+mkdir -p "$SCREENTIME_DIR"
+
+today() { date +%F; }
+
+launch_blocker_for() {
+    local user=$1
+    local uid
+    uid=$(id -u "$user")
+    machinectl shell --uid="$uid" .host /usr/bin/electron "$BLOCKER" >/dev/null 2>&1 &
+}
+
+while true; do
+    if [ -f "$PUBLIC" ]; then
+        jq -r 'to_entries[] | select(.value.type=="child") | "\(.key)\t\(.value.dailyLimitMinutes // 0)"' "$PUBLIC" | \
+        while IFS=$'\t' read -r user limit; do
+            id "$user" &>/dev/null || continue
+
+            # only count minutes while the child actually has an active session
+            loginctl list-sessions --no-legend 2>/dev/null | awk -v u="$user" '$3==u' | grep -q . || continue
+
+            f="$SCREENTIME_DIR/$user.json"
+            [ -f "$f" ] || echo '{"date":"","minutes":0}' > "$f"
+
+            date_in_file=$(jq -r '.date' "$f")
+            minutes=$(jq -r '.minutes' "$f")
+            if [ "$date_in_file" != "$(today)" ]; then
+                date_in_file=$(today); minutes=0
+            fi
+            minutes=$((minutes + 1))
+            jq -n --arg d "$date_in_file" --argjson m "$minutes" '{date:$d, minutes:$m}' > "$f"
+
+            if [ "$minutes" -ge "$limit" ]; then
+                launch_blocker_for "$user"
+            fi
+        done
+    fi
+    sleep 60
+done

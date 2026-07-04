@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  html, body { margin:0; height:100%; background:#0f0f14; color:#f2f2f2;
+    font-family:"Noto Sans", sans-serif; display:flex; align-items:center;
+    justify-content:center; }
+  .box { text-align:center; }
+  h1 { font-weight:300; font-size:2.2rem; }
+  p { opacity:.75; font-size:1.1rem; }
+  button { margin-top:2rem; background:#dc2626; color:white; border:none;
+    padding:1rem 2.2rem; font-size:1.2rem; border-radius:10px; cursor:pointer; }
+</style></head>
+<body>
+  <div class="box">
+    <h1>Screen time is up for today</h1>
+    <p>Come back tomorrow, or ask an adult for more time.</p>
+    <button onclick="window.plasmatv.powerOff()">Power Off</button>
+  </div>
+</body>
+</html>
