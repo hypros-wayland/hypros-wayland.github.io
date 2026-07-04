@@ -417,9 +417,11 @@ plymouth-set-default-theme -R spinner || true
 # --- bootloader: differs by firmware -------------------------------------
 FIRMWARE="$FIRMWARE"
 if [ "\$FIRMWARE" = "uefi64" ]; then
-    # 64-bit UEFI: no GRUB at all. Build a Unified Kernel Image and
-    # register it directly as an EFI boot entry named "System0" — the
-    # firmware boots it with no bootloader/menu layer in between.
+    # 64-bit UEFI: Build a Unified Kernel Image and use systemd-boot
+    # as the boot manager. systemd-boot natively supports UKI files
+    # placed in /boot/EFI/Linux/ and auto-discovers them — no manual
+    # loader entry needed. The firmware boots systemd-boot, which
+    # immediately hands off to the UKI.
     echo "root=UUID=$ROOT_UUID rw quiet splash" > /etc/kernel/cmdline
     mkdir -p /boot/EFI/Linux
     cat > /etc/mkinitcpio.d/linux.preset << 'PRESET'
@@ -430,14 +432,15 @@ default_options="--cmdline /etc/kernel/cmdline"
 PRESET
     mkinitcpio -p linux
 
-    ESP_PARTNUM=1
-    efibootmgr --create --disk "$DISK" --part "\$ESP_PARTNUM" \
-      --loader '\EFI\Linux\plasmatv.efi' --label "System0"
-    BOOTNUM=\$(efibootmgr | awk '/System0/ {print substr(\$1,5,4); exit}')
-    [ -n "\$BOOTNUM" ] && efibootmgr --bootorder "\$BOOTNUM" || true
-    # NOTE: this UKI is unsigned. If Secure Boot is enabled in firmware
-    # setup, either disable it or sign the UKI yourself (sbsigntools) —
-    # out of scope for this installer.
+    # systemd-boot: install to ESP, then set timeout 0 so it boots
+    # the UKI immediately with no menu.
+    bootctl install --esp-path=/boot 2>/dev/null || true
+    mkdir -p /boot/loader
+    cat > /boot/loader/loader.conf << 'LOADER'
+default @saved
+timeout 0
+console-mode keep
+LOADER
 else
     mkinitcpio -P
 
