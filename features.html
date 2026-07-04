@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Features — PlasmaTV Linux</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">Plasma<span>TV</span></a>
+    <div class="nav-links">
+      <a href="install.html">Install</a>
+      <a href="build.html">Build</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="index.html">Home</a>
+      <a href="install.html">Installation guide</a>
+      <a href="build.html">Building the ISO</a>
+      <a href="features.html" class="active">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="troubleshooting.html">Troubleshooting</a>
+    </aside>
+
+    <main class="content">
+      <h1>Features</h1>
+      <p class="lead">Everything PlasmaTV Linux offers out of the box.</p>
+
+      <h2>Plasma Bigscreen</h2>
+      <p>The default session is KDE Plasma Bigscreen — a TV-optimized 10-foot UI designed for couch use. Navigate with a keyboard, mouse, or remote control. Big, readable cards, minimal UI chrome, and full focus on content.</p>
+
+      <h2>One-click desktop switch</h2>
+      <p>Two desktop files let you switch between Bigscreen and the classic Plasma Desktop: <strong>"Switch to Desktop"</strong> and <strong>"Switch to Bigscreen"</strong>. Selecting one updates the SDDM autologin config and restarts the display manager — no command line needed.</p>
+
+      <h2>User selector</h2>
+      <p>Instead of a traditional login prompt, PlasmaTV boots into a custom user selector screen. Select your profile and, if configured, enter a PIN. This is the same flow used by streaming platforms like Netflix. The selector runs as a dedicated <code>selector-user</code> with minimal privileges.</p>
+
+      <h2>25 streaming apps</h2>
+      <p>Each streaming service runs as its own Electron kiosk app — a frameless, chromeless window that feels like a native TV app. Press Escape to quit back to Bigscreen. <a href="apps.html">See the full list.</a></p>
+
+      <h2>Parental controls</h2>
+      <p>Comprehensive child management with PIN-protected profiles, screen time limits, DNS content filtering, and a restricted shell. <a href="parental-controls.html">Full documentation.</a></p>
+
+      <h2>TV OOBE wizard</h2>
+      <p>First boot launches a TV-style out-of-box experience that guides you through language, timezone, Wi-Fi, and theme selection. Clean, minimal, and designed for a TV screen.</p>
+
+      <h2>Plymouth boot splash</h2>
+      <p>Boots with Plymouth (spinner theme) and a <code>quiet splash</code> kernel command line — no verbose kernel messages, just a clean boot animation.</p>
+
+      <h2>Auto-login, no prompts</h2>
+      <p>SDDM auto-logs into the user selector. Extra TTYs (tty2-6) are masked — there's no login prompt reachable except through the graphical session. Root login is locked entirely.</p>
+
+      <h2>Audio</h2>
+      <p>Uses PipeWire + WirePlumber — the modern PulseAudio-compatible stack that ships on fresh Arch/KDE installs. No PulseAudio dependency.</p>
+
+      <h2>Rolling releases</h2>
+      <p>Based on Arch Linux — once installed, <code>sudo pacman -Syu</code> keeps everything up to date. No need to wait for a new ISO.</p>
+    </main>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 PlasmaTV Linux &middot; <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux">GitHub</a></p>
+  </footer>
+</body>
+</html>

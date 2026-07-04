@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parental controls — PlasmaTV Linux</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">Plasma<span>TV</span></a>
+    <div class="nav-links">
+      <a href="install.html">Install</a>
+      <a href="build.html">Build</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="index.html">Home</a>
+      <a href="install.html">Installation guide</a>
+      <a href="build.html">Building the ISO</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html" class="active">Parental controls</a>
+      <a href="troubleshooting.html">Troubleshooting</a>
+    </aside>
+
+    <main class="content">
+      <h1>Parental controls</h1>
+      <p class="lead">Child profiles with PIN locks, screen limits, and filtering.</p>
+
+      <h2>Overview</h2>
+      <p>PlasmaTV includes a full parental control system designed for families. The adult user (tv-user) can create up to 16 child profiles with individual restrictions.</p>
+
+      <h2>Child accounts</h2>
+      <p>Each child gets a Linux user account (<code>child-user-0</code> through <code>child-user-15</code>) with:</p>
+      <ul>
+        <li><strong>Restricted shell (<code>rbash</code>)</strong> — a locked-down bash that only allows whitelisted commands</li>
+        <li><strong>Locked PATH</strong> — only <code>/usr/local/lib/plasmatv-child-bin/</code> is in the path, containing only <code>electron</code></li>
+        <li><strong>No sudo access</strong> — no password, no privilege escalation</li>
+        <li><strong>Screen time tracking</strong> — usage is logged to <code>/var/lib/plasmatv/screentime/</code></li>
+      </ul>
+
+      <h2>PINs</h2>
+      <p>Child profiles can be protected with a numeric PIN (salted SHA-256). The PIN is verified by a root helper (<code>plasmatv-verify-pin</code>) callable only from the user-selector session via a tightly scoped sudoers rule.</p>
+
+      <h2>Screen time limits</h2>
+      <p>The <code>plasmatv-timelimit-daemon</code> runs as a systemd service that polls every 60 seconds. When a child exceeds their daily limit, the Screen Time Blocker Electron app launches in fullscreen with no easy escape (Escape and Alt+F4 are prevented via <code>e.preventDefault()</code>).</p>
+
+      <h2>DNS filtering</h2>
+      <p>The <code>plasmatv-dns-rules</code> service uses iptables NAT rules to redirect all DNS traffic to Cloudflare for Families (1.1.1.3), which blocks malware and adult content at the DNS level. IPv6 DNS is also redirected.</p>
+
+      <h2>Managing children</h2>
+      <p>Use the <strong>Child Manager</strong> app from the Bigscreen launcher. It provides a GUI for:</p>
+      <ul>
+        <li>Creating new child profiles</li>
+        <li>Setting or changing PINs</li>
+        <li>Deleting child accounts</li>
+        <li>Viewing screen time usage</li>
+      </ul>
+
+      <h2>Sudoers scoping</h2>
+      <p>Access to the parental control system is carefully scoped through multiple sudoers files:</p>
+      <table>
+        <tr><th>Rule file</th><th>What it allows</th></tr>
+        <tr><td><code>plasmatv-adult</code></td><td>tv-user can manage children, set PINs, factory reset</td></tr>
+        <tr><td><code>plasmatv-selector</code></td><td>selector-user can only verify PINs and start sessions</td></tr>
+        <tr><td><code>plasmatv-user-units</code></td><td>All users can restart SDDM (for return-to-selector flow)</td></tr>
+        <tr><td><code>tv-user-session-switch</code></td><td>tv-user can switch between Bigscreen and Desktop</td></tr>
+      </table>
+    </main>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 PlasmaTV Linux &middot; <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux">GitHub</a></p>
+  </footer>
+</body>
+</html>

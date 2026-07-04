@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building the ISO — PlasmaTV Linux</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">Plasma<span>TV</span></a>
+    <div class="nav-links">
+      <a href="install.html">Install</a>
+      <a href="build.html">Build</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="index.html">Home</a>
+      <a href="install.html">Installation guide</a>
+      <a href="build.html" class="active">Building the ISO</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="troubleshooting.html">Troubleshooting</a>
+    </aside>
+
+    <main class="content">
+      <h1>Building the ISO</h1>
+      <p class="lead">Build your own PlasmaTV Linux ISO from source.</p>
+
+      <h2>Prerequisites</h2>
+      <ul>
+        <li>An Arch Linux system (the build uses <code>mkarchiso</code> which is Arch-specific)</li>
+        <li><code>archiso</code> package installed: <code>sudo pacman -S archiso</code></li>
+        <li>About 10 GB of free disk space for the build artifacts</li>
+      </ul>
+
+      <h2>Build steps</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <div class="text"><strong>Clone the repo:</strong><br>
+          <code>git clone https://github.com/plasmatvlinux/PlasmaTV-Linux.git</code></div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="text"><strong>Run the build script:</strong><br>
+          <code>cd PlasmaTV-Linux && sudo ./installer/build.sh</code></div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="text"><strong>Find the ISO in</strong> <code>out/</code>:</div>
+        </div>
+      </div>
+      <p>Done. The ISO is at <code>out/plasmatv-linux-YYYY.MM.DD-x86_64.iso</code>.</p>
+
+      <h2>How it works</h2>
+      <p>The build script:</p>
+      <ol>
+        <li>Copies the package list (<code>archiso/packages.x86_64</code>) into the airootfs so the installer can use it for pacstrap</li>
+        <li>Copies the <code>skel/</code> tree (target system files) into the airootfs</li>
+        <li>Runs <code>mkarchiso</code> with the custom archiso profile</li>
+      </ol>
+      <p>The archiso profile lives in <code>archiso/</code> and is based on the official releng profile with modifications for:</p>
+      <ul>
+        <li>Plymouth boot splash (spinner theme)</li>
+        <li>Root auto-login on tty1 via getty override</li>
+        <li>Auto-launch of the dialog-based installer</li>
+        <li>Custom bootloader configs (single "System0" entry for BIOS/GRUB, UKI for UEFI)</li>
+      </ul>
+
+      <h2>Customizing the build</h2>
+      <p>To add or remove packages, edit <code>archiso/packages.x86_64</code>. This file is used both for the live environment and for the target system's pacstrap.</p>
+      <p>To modify the installer, edit <code>archiso/airootfs/root/install.sh</code>.</p>
+      <p>To add or change system files that get copied to the target, edit files in <code>skel/</code>.</p>
+
+      <div class="warn"><strong>Note:</strong> The <code>work/</code> directory contains root-owned build artifacts. Clean it with <code>sudo rm -rf work out</code> before rebuilding.</div>
+    </main>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 PlasmaTV Linux &middot; <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux">GitHub</a></p>
+  </footer>
+</body>
+</html>

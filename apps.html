@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apps — PlasmaTV Linux</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">Plasma<span>TV</span></a>
+    <div class="nav-links">
+      <a href="install.html">Install</a>
+      <a href="build.html">Build</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="index.html">Home</a>
+      <a href="install.html">Installation guide</a>
+      <a href="build.html">Building the ISO</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html" class="active">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="troubleshooting.html">Troubleshooting</a>
+    </aside>
+
+    <main class="content">
+      <h1>Apps</h1>
+      <p class="lead">25 streaming wrappers + 4 system apps, all running as Electron kiosk windows.</p>
+
+      <h2>Streaming apps</h2>
+      <p>Each app is a simple Electron wrapper that opens the service's website in a frameless, fullscreen window. Press <strong>Escape</strong> to quit back to Bigscreen.</p>
+
+      <table>
+        <tr><th>App</th><th>URL</th></tr>
+        <tr><td>Netflix</td><td>netflix.com</td></tr>
+        <tr><td>YouTube</td><td>youtube.com</td></tr>
+        <tr><td>YouTube Music</td><td>music.youtube.com</td></tr>
+        <tr><td>Disney+</td><td>disneyplus.com</td></tr>
+        <tr><td>Prime Video</td><td>primevideo.com</td></tr>
+        <tr><td>Max</td><td>max.com</td></tr>
+        <tr><td>Hulu</td><td>hulu.com</td></tr>
+        <tr><td>Apple TV</td><td>tv.apple.com</td></tr>
+        <tr><td>Paramount+</td><td>paramountplus.com</td></tr>
+        <tr><td>Twitch</td><td>twitch.tv</td></tr>
+        <tr><td>Spotify</td><td>open.spotify.com</td></tr>
+        <tr><td>Peacock</td><td>peacocktv.com</td></tr>
+        <tr><td>Crunchyroll</td><td>crunchyroll.com</td></tr>
+        <tr><td>Plex</td><td>app.plex.tv</td></tr>
+        <tr><td>Tubi</td><td>tubitv.com</td></tr>
+        <tr><td>Pluto TV</td><td>pluto.tv</td></tr>
+        <tr><td>Discovery+</td><td>discoveryplus.com</td></tr>
+        <tr><td>ESPN</td><td>espn.com/watch</td></tr>
+        <tr><td>Vimeo</td><td>vimeo.com</td></tr>
+        <tr><td>Amazon Music</td><td>music.amazon.com</td></tr>
+        <tr><td>Deezer</td><td>deezer.com</td></tr>
+        <tr><td>SoundCloud</td><td>soundcloud.com</td></tr>
+        <tr><td>Sling TV</td><td>sling.com</td></tr>
+        <tr><td>fuboTV</td><td>fubo.tv</td></tr>
+        <tr><td>DAZN</td><td>dazn.com</td></tr>
+      </table>
+
+      <h2>System apps</h2>
+      <table>
+        <tr><th>App</th><th>Description</th></tr>
+        <tr><td><strong>TV OOBE</strong></td><td>First-boot wizard — language, timezone, Wi-Fi, theme setup.</td></tr>
+        <tr><td><strong>User Selector</strong></td><td>Main login screen showing user profiles with optional PIN verification.</td></tr>
+        <tr><td><strong>Child Manager</strong></td><td>GUI for creating, editing, and deleting child accounts.</td></tr>
+        <tr><td><strong>Screen Time Blocker</strong></td><td>Fullscreen overlay shown when a child's daily screen time limit is reached.</td></tr>
+        <tr><td><strong>Factory Reset</strong></td><td>Wipes all user data and re-enables the OOBE on next boot.</td></tr>
+      </table>
+
+      <h2>How it works</h2>
+      <p>Each app lives in <code>/opt/plasmatv-apps/</code> with its own <code>main.js</code> and <code>package.json</code>. They're launched via <code>.desktop</code> files in <code>/usr/share/applications/</code>. All streaming apps use <code>contextIsolation: true</code> and <code>nodeIntegration: false</code> for security.</p>
+    </main>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 PlasmaTV Linux &middot; <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux">GitHub</a></p>
+  </footer>
+</body>
+</html>

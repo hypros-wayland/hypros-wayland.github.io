@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Troubleshooting — PlasmaTV Linux</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">Plasma<span>TV</span></a>
+    <div class="nav-links">
+      <a href="install.html">Install</a>
+      <a href="build.html">Build</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="index.html">Home</a>
+      <a href="install.html">Installation guide</a>
+      <a href="build.html">Building the ISO</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="troubleshooting.html" class="active">Troubleshooting</a>
+    </aside>
+
+    <main class="content">
+      <h1>Troubleshooting</h1>
+      <p class="lead">Common issues and how to fix them.</p>
+
+      <h2>Installation issues</h2>
+
+      <h3>Network not working during install</h3>
+      <p>The installer attempts to configure networking automatically — ethernet first, then Wi-Fi. If it fails:</p>
+      <ol>
+        <li>Switch to tty2 with <code>Ctrl+Alt+F2</code></li>
+        <li>Check available interfaces: <code>ip link</code></li>
+        <li>Scan for Wi-Fi: <code>nmcli dev wifi list</code></li>
+        <li>Connect manually: <code>nmcli dev wifi connect SSID password PASSWORD</code></li>
+        <li>Switch back to tty1 (<code>Ctrl+Alt+F1</code>) and re-run: <code>/root/install.sh</code></li>
+      </ol>
+
+      <h3>Installer fails at pacstrap</h3>
+      <p>If pacman-key isn't initialized, the installer runs <code>pacman-key --init && pacman-key --populate archlinux</code> automatically. If it still fails, ensure you have a working internet connection and try again.</p>
+
+      <h3>"Failed to switch root" on boot</h3>
+      <p>This usually means the initramfs can't find the root filesystem. Make sure:</p>
+      <ul>
+        <li>The <code>archiso</code> hooks are present in <code>mkinitcpio.conf</code></li>
+        <li>The initramfs is rebuilt after changes</li>
+      </ul>
+
+      <h2>Post-installation issues</h2>
+
+      <h3>SDDM doesn't auto-login</h3>
+      <p>Check that <code>/etc/sddm.conf.d/autologin.conf</code> exists and contains:</p>
+      <pre><code>[Autologin]
+User=selector-user
+Session=plasmatv-selector.desktop
+Relogin=true</code></pre>
+      <p>Also verify <code>/usr/share/wayland-sessions/plasmatv-selector.desktop</code> exists.</p>
+
+      <h3>Electron apps don't launch</h3>
+      <p>Ensure the <code>electron</code> package is installed: <code>sudo pacman -S electron</code>. The installer includes it in the package list, but if you used the transform script on an existing Arch install, you may need to install it manually.</p>
+
+      <h3>No audio</h3>
+      <p>PlasmaTV uses PipeWire. Check that the service is running:</p>
+      <pre><code>systemctl --user status pipewire
+systemctl --user status wireplumber</code></pre>
+      <p>If not running, start them manually:</p>
+      <pre><code>systemctl --user enable --now pipewire pipewire-pulse wireplumber</code></pre>
+
+      <h3>Switching between Bigscreen and Desktop doesn't work</h3>
+      <p>The switch scripts update the <code>Session=</code> line in <code>/etc/sddm.conf.d/autologin.conf</code> and restart SDDM. If it fails, check:</p>
+      <ul>
+        <li>The session file name in <code>/usr/share/wayland-sessions/</code> matches what the switch scripts expect</li>
+        <li>SDDM is running: <code>systemctl status sddm</code></li>
+      </ul>
+
+      <h2>Building issues</h2>
+
+      <h3>mkarchiso fails with permission errors</h3>
+      <p>Previous build artifacts may have root-owned files. Clean them:</p>
+      <pre><code>sudo rm -rf work out</code></pre>
+
+      <h3>Package not found during build</h3>
+      <p>Ensure the package name is correct and available in the Arch repos. For AUR packages, you'll need to handle them separately — the build only includes official repo packages.</p>
+
+      <h2>Getting help</h2>
+      <p>Open an issue on <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux/issues">GitHub</a> with details about the problem and any relevant log output.</p>
+    </main>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 PlasmaTV Linux &middot; <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux">GitHub</a></p>
+  </footer>
+</body>
+</html>

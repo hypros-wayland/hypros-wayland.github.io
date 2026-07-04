@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installation guide — PlasmaTV Linux</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top-nav">
+    <a href="index.html" class="logo">Plasma<span>TV</span></a>
+    <div class="nav-links">
+      <a href="install.html">Install</a>
+      <a href="build.html">Build</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <a href="index.html">Home</a>
+      <a href="install.html" class="active">Installation guide</a>
+      <a href="build.html">Building the ISO</a>
+      <a href="features.html">Features</a>
+      <a href="apps.html">Apps</a>
+      <a href="parental-controls.html">Parental controls</a>
+      <a href="troubleshooting.html">Troubleshooting</a>
+    </aside>
+
+    <main class="content">
+      <h1>Installation guide</h1>
+      <p class="lead">From ISO to PlasmaTV in about 10 minutes.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <div class="text"><strong>Download the ISO</strong> from <a href="https://sourceforge.net/projects/plasmatv-linux/files/latest/download">SourceForge</a>.</div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div class="text"><strong>Write it to a USB drive.</strong> Find your USB device with <code>lsblk</code>, then:<br>
+          <code>sudo dd if=plasmatv-linux-*.iso of=/dev/sdX bs=4M status=progress conv=fsync</code><br>
+          Replace <code>/dev/sdX</code> with your actual device (not a partition).</div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div class="text"><strong>Boot from the USB.</strong> On most machines, press F12 during boot to select the boot device, or configure the BIOS to boot from USB first.</div>
+        </div>
+        <div class="step">
+          <div class="num">4</div>
+          <div class="text"><strong>The installer starts automatically.</strong> Root auto-logs in on tty1 and launches the dialog-based installer. Follow the on-screen prompts.</div>
+        </div>
+        <div class="step">
+          <div class="num">5</div>
+          <div class="text"><strong>Select a disk.</strong> The installer will ask you to pick a disk. Everything on it will be erased.</div>
+        </div>
+        <div class="step">
+          <div class="num">6</div>
+          <div class="text"><strong>Set up networking</strong> — ethernet is detected automatically; Wi-Fi can be configured interactively if no wired link is found.</div>
+        </div>
+        <div class="step">
+          <div class="num">7</div>
+          <div class="text"><strong>Wait for the install.</strong> pacstrap downloads and installs all packages. This takes 5-15 minutes depending on your internet speed.</div>
+        </div>
+        <div class="step">
+          <div class="num">8</div>
+          <div class="text"><strong>Reboot.</strong> Remove the USB drive and reboot. The system boots into the PlasmaTV user selector.</div>
+        </div>
+        <div class="step">
+          <div class="num">9</div>
+          <div class="text"><strong>Complete the OOBE.</strong> On first boot, the TV OOBE wizard walks you through language, timezone, Wi-Fi, and theme setup.</div>
+        </div>
+      </div>
+
+      <h2>System requirements</h2>
+      <table>
+        <tr><th>Component</th><th>Minimum</th></tr>
+        <tr><td>CPU</td><td>64-bit x86 (Intel/AMD), 2+ cores</td></tr>
+        <tr><td>RAM</td><td>4 GB</td></tr>
+        <tr><td>Storage</td><td>32 GB (SSD recommended)</td></tr>
+        <tr><td>GPU</td><td>Any GPU with KMS/DRM support (Intel, AMD, NVIDIA)</td></tr>
+        <tr><td>Firmware</td><td>BIOS or UEFI (64-bit)</td></tr>
+      </table>
+
+      <h2>Bootloader details</h2>
+      <table>
+        <tr><th>Firmware</th><th>Partition table</th><th>Bootloader</th></tr>
+        <tr><td>Legacy BIOS</td><td>GPT + bios_grub (or MBR)</td><td>GRUB i386-pc</td></tr>
+        <tr><td>32-bit UEFI</td><td>GPT + ESP</td><td>GRUB i386-efi (removable)</td></tr>
+        <tr><td>64-bit UEFI</td><td>GPT + ESP</td><td>Unified Kernel Image (no bootloader)</td></tr>
+      </table>
+
+      <div class="info"><strong>Note:</strong> The 64-bit UEFI path uses a UKI registered directly with efibootmgr. If Secure Boot is enabled, either disable it or sign the UKI yourself.</div>
+
+      <h2>Converting an existing Arch install</h2>
+      <p>Already running Arch and don't want to reinstall? Clone the repo and run the transform script:</p>
+      <pre><code>git clone https://github.com/plasmatvlinux/PlasmaTV-Linux.git
+cd PlasmaTV-Linux
+sudo ./transform-existing-system.sh</code></pre>
+      <p>The script installs the PlasmaTV package set, creates tv-user/selector-user, wires up SDDM autologin, and enables the PlasmaTV services. It does NOT touch your disk layout, existing users, or personal files.</p>
+    </main>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 PlasmaTV Linux &middot; <a href="https://github.com/plasmatvlinux/PlasmaTV-Linux">GitHub</a></p>
+  </footer>
+</body>
+</html>
