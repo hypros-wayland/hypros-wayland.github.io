@@ -1,6 +1,6 @@
 # PlasmaTV Linux
 
-[WARNING]
+> [!WARNING]
 > This project has been discontinued.
 > HyprOS will be soon released and the website will be overwritten.
 
