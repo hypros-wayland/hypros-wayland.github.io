@@ -1,5 +1,9 @@
 # PlasmaTV Linux
 
+[WARNING]
+> This project has been discontinued.
+> HyprOS will be soon released and the website will be overwritten.
+
 An Arch Linux based distro that boots straight into a TV-first KDE Plasma
 Bigscreen experience, with a classic Plasma Desktop available one click away.
 
